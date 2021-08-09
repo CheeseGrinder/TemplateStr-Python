@@ -17,13 +17,13 @@ parser = TemplateStr(functionList: list, variableDict: dict)
 parser.parse(text)
 ```
 
-- `parse() -> str` : parse all (variable function and condition)
-- `parseVariable() -> str` : parse variable ; {{$variable}}
-- `parseFunction() -> str` : parse Function ; {{@function}}
-- `parseCondition() -> str` : parse variable ; {{#condition var}} value {{else}} value {{condition#}}
-- `hasVariable() -> Tuple[bool, list]` : check if there are any variables
-- `hasFunction() -> Tuple[bool, list]` : check if there are any function
-- `hasCondition() -> Tuple[bool, list]` : check if there are any condition
+- `parse(text: str) -> str` : parse all (variable function and condition)
+- `parseVariable(text: str) -> str` : parse variable ; {{$variable}}
+- `parseFunction(text: str) -> str` : parse Function ; {{@function}}
+- `parseCondition(text: str) -> str` : parse variable ; {{#condition var}} value {{else}} value {{condition#}}
+- `hasVariable(text: str) -> Tuple[bool, list]` : check if there are any variables
+- `hasFunction(text: str) -> Tuple[bool, list]` : check if there are any function
+- `hasCondition(text: str) -> Tuple[bool, list]` : check if there are any condition
 
 <details>
 <summary><strong>Variable</strong></summary>

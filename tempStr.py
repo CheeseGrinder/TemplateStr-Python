@@ -10,8 +10,8 @@ class TemplateStr:
     __variables: dict
     __regVariable: Pattern = regex.compile(r'(?P<match>{{\$(?P<key>[^{{$}}]+)}})')
     __regFunction: Pattern = regex.compile(r'(?P<match>{{@(?P<function>[^{@}\s]+) ?(?P<key>[^{@}]+)?}})')
-    __regFunctionParam: Pattern = regex.compile(r'\"(?P<str_double>[^\"]+)\"|\'(?P<str_single>[^\']+)\'|`(?P<str_back>[^`]+)`|<b:(?P<bool>True|False)>|<i:(?P<int>[0-9_.]+)>|(?P<variable>[^<>\" ]+)')
-    __regCondition: Pattern = regex.compile(r'(?P<match>{{#(?P<keyStart>[^{#}]+) (?P<variable>[^{}]+)}} (?P<resultValue1>[^{}]+) {{else}} (?P<resultValue2>[^{}]+) {{(?P<keyEnd>[^{}]+)#}})')
+    __regFunctionParam: Pattern = regex.compile(r'\"(?P<str_double>[^\"]+)\"|\'(?P<str_single>[^\']+)\'|`(?P<str_back>[^`]+)`|<b:(?P<bool>True|False)>|<n:(?P<number>[0-9_.]+)>|(?P<variable>[^<>\" ]+)')
+    __regCondition: Pattern = regex.compile(r'(?P<match>{{#(?P<keyStart>[^{#}]+) (?P<variable>[^{#}]+)}} (?P<resultValue1>[^{}]+) {{else}} (?P<resultValue2>[^{}]+) {{(?P<keyEnd>[^{#}]+)#}})')
 
     def __init__(self, functionList: list = [], variableDict: dict = {}):
         '''
@@ -22,10 +22,6 @@ class TemplateStr:
 
         self.__functions = functionList
         self.__variables = variableDict
-
-        # VariableExemple : {{$var1}}
-        # VariableExemple : {{@var1}} {{@var1 arg1 arg2}}
-        # VariableExemple : {{#succes var1}} oui {{else}} non {{succes#}}
 
     def __presence(self, list: list) -> Tuple[bool, list]:
         presences: list = []
@@ -71,7 +67,7 @@ class TemplateStr:
             match: str = group['match']
             key: str = group['key']
 
-            text = text.replace(match, self.__variables[key])
+            text = text.replace(match, str(self.__variables[key]))
 
         return text
 
@@ -81,11 +77,11 @@ class TemplateStr:
 
         param type:
 
-            keyVariable : is the key of the value in the dictionary pass to the constructor (return the value)
+            keyVariable  : is the key of the value in the dictionary pass to the constructor (return the value)
             <b:True>     : bool  (return True)
-            <i:123>      : int   (return 123)
-            <i:123.4>    : float (return 123.4)
-            "text"      : str   (return text)
+            <n:123>      : int   (return 123)
+            <n:123.4>    : float (return 123.4)
+            "text"       : str   (return text)
 
         return -> str
         '''
@@ -129,14 +125,14 @@ class TemplateStr:
                                 elif groupParam['bool'] != None:
                                     typeBool: bool = bool(strtobool(groupParam['bool']))
                                     listParametre.append(typeBool)
-                                elif groupParam['int'] != None:
-                                    if '.' in groupParam['int']:
-                                        number: float = float(groupParam['int'])
+                                elif groupParam['number'] != None:
+                                    if '.' in groupParam['number']:
+                                        number: float = float(groupParam['number'])
                                     else:
-                                        number: int = int(groupParam['int'])
+                                        number: int = int(groupParam['number'])
                                     listParametre.append(number)
                                 elif groupParam['variable'] != None:
-                                    listParametre.append(self.__variables[groupParam['variable']])
+                                    listParametre.append(str(self.__variables[groupParam['variable']]))
 
                             method = {func:func}
                             resultTextfunc = method[func](listParametre)
@@ -213,8 +209,4 @@ class TemplateStr:
 
         find: list = regex.findall(self.__regCondition, text)
         return self.__presence(find)
-
-
-
-
 

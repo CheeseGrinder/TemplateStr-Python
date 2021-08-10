@@ -2,6 +2,8 @@
 
 ### TemplateStr allows to add variable, function and condition in a string, useful in config files.
 
+![Python](https://img.shields.io/badge/Python-v3.8%5E-green?style=flat-square&logo=python&logoColor=00ccff)
+
 <strong>Construtor : </strong>
 
 ```python
@@ -109,8 +111,8 @@ param type:
 |------------------------------|---------|-------------------------------------------------------------------|------------------------|
 | keyVariable                  | `*`     | is the key of the value in the dictionary pass to the constructor | value of `keyVariable` |
 | \<b:True>                    | `bool`  |                                                                   | True                   |
-| \<i:123>                     | `int`   |                                                                   | 123                    |
-| \<i:123.4>                   | `float` |                                                                   | 123.4                  |
+| \<n:123>                     | `int`   |                                                                   | 123                    |
+| \<n:123.4>                   | `float` |                                                                   | 123.4                  |
 | "text" or 'text' or \`text\` | `str`   |                                                                   | text                   |
 
 

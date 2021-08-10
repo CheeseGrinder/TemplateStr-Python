@@ -1,22 +1,28 @@
 import unittest
 from tempStr import TemplateStr
 
-def testFunction(list:list) -> str:
-    text = list[0]
-    b = list[1]
+print("\n-------------------------------- Test --------------------------------\n")
 
-    if b:
-       text = text.replace(text, "YES")
+def testType(list:list) -> str:
+    
+    if type(list[0]) != str: raise TypeError
+    if type(list[1]) != str: raise TypeError
+    if type(list[2]) != str: raise TypeError
+    if type(list[3]) != bool: raise TypeError
+    if type(list[4]) != int: raise TypeError
+    if type(list[5]) != float: raise TypeError
+    if type(list[6]) != str: raise TypeError
+    if type(list[7]) != str: raise TypeError
 
-    return text
+    return 'YES'
 
-varDict: dict = {"varTest1":"hello", "varTest2":"Wowwww", "varTest3":"UwU"}
+varDict: dict = {"varTest1":"hello", "varTest2":"Woww", "varTest3": 123, "varTest4": True}
 
-funcs: list = [testFunction]
+funcs: list = [testType]
 
 parser = TemplateStr(functionList=funcs, variableDict=varDict)
 
-textFull: str = "{{@testFunction 'Euuuuu' <b:True>}} sir, {{$varTest1}} {{#ouf varTest2}} good morning {{else}} good night {{ouf#}}"
+textFull: str = "{{@testType 'E' \"E\" `E` <b:True> <n:123> <n:123.4> varTest3 varTest4}} sir, {{$varTest1}} {{#ouf varTest2}} good morning {{else}} good night {{ouf#}}"
 
 
 class TestParseMethode(unittest.TestCase):
@@ -24,6 +30,8 @@ class TestParseMethode(unittest.TestCase):
     def test_full(self):
 
         result: str = parser.parse(textFull)
+
+        print(result)
 
         self.assertEqual(result, 'YES sir, hello good night')
 

@@ -10,14 +10,21 @@ class TemplateStr:
     __variables: dict
     __regVariable: Pattern = regex.compile(r'(?P<match>{{\$(?P<key>[^{{$}}]+)}})')
     __regFunction: Pattern = regex.compile(r'(?P<match>{{@(?P<function>[^{@}\s]+) ?(?P<key>[^{@}]+)?}})')
-    __regFunctionParam: Pattern = regex.compile(r'\"(?P<str_double>[^\"]+)\"|\'(?P<str_single>[^\']+)\'|`(?P<str_back>[^`]+)`|<b:(?P<bool>True|False)>|<n:(?P<number>[0-9_.]+)>|(?P<variable>[^<>\" ]+)')
-    __regCondition: Pattern = regex.compile(r'(?P<match>{{#(?P<keyStart>[^{#}]+) (?P<variable>[^{#}]+)}} (?P<resultValue1>[^{}]+) {{else}} (?P<resultValue2>[^{}]+) {{(?P<keyEnd>[^{#}]+)#}})')
+    __regCondition: Pattern = regex.compile(r'(?P<match>{{#(?P<compValue1>[^{#}]+) (?P<compSymbol>[=!<>][=]?) (?P<compValue2>[^{#}]+): (?P<resultValue1>[^{}]+) \|\| (?P<resultValue2>[^{}]+) }})')
+    __regTyping: Pattern = regex.compile(r'\"(?P<str_double>[^\"]+)\"|\'(?P<str_single>[^\']+)\'|`(?P<str_back>[^`]+)`|<b:(?P<bool>True|False)>|<n:(?P<number>[0-9_.]+)>|(?P<variable>[^<>\" ]+)')
 
     def __init__(self, functionList: list = [], variableDict: dict = {}):
         '''
         `functionList: list` is a list of custom functions that can be used when you call a function with: `{{@myCustomFunction}}`
 
         `variableDict: dict` is a dictionary of the values you want to use when you call: `{{$myVar}}`
+
+        Typing:
+            keyVariable  : is the key of the value in the dictionary pass to the constructor (return the value)
+            <b:True>     : bool  (return True)
+            <n:123>      : int   (return 123)
+            <n:123.4>    : float (return 123.4)
+            "text"       : str   (return text)
         '''
 
         self.__functions = functionList
@@ -32,6 +39,33 @@ class TemplateStr:
             return [True, presences]
         else:
             return [False, None]
+
+    def __typing(self, string: str) -> list:
+
+        list_temp: list = []
+
+        for m in self.__regTyping.finditer(string):
+            groupParam: dict = m.groupdict()
+
+            if groupParam['str_double'] != None:
+                list_temp.append(groupParam['str_double'])
+            elif groupParam['str_single'] != None:
+                list_temp.append(groupParam['str_single'])
+            elif groupParam['str_back'] != None:
+                list_temp.append(groupParam['str_back'])
+            elif groupParam['bool'] != None:
+                typeBool: bool = bool(strtobool(groupParam['bool']))
+                list_temp.append(typeBool)
+            elif groupParam['number'] != None:
+                if '.' in groupParam['number']:
+                    number: float = float(groupParam['number'])
+                else:
+                    number: int = int(groupParam['number'])
+                list_temp.append(number)
+            elif groupParam['variable'] != None:
+                list_temp.append(str(self.__variables[groupParam['variable']]))
+
+        return list_temp
 
     def parse(self, text: str) -> str:
         '''
@@ -75,14 +109,6 @@ class TemplateStr:
         '''
         parse all the `{{@function param1 param2}}` or `{{@function}}` in the text give in
 
-        param type:
-
-            keyVariable  : is the key of the value in the dictionary pass to the constructor (return the value)
-            <b:True>     : bool  (return True)
-            <n:123>      : int   (return 123)
-            <n:123.4>    : float (return 123.4)
-            "text"       : str   (return text)
-
         return -> str
         '''
 
@@ -111,28 +137,8 @@ class TemplateStr:
                     if regex.search(r'(?<!\S){}(?!\S)'.format(functionName), str(func)) != None:
 
                         if group['key'] != None:
-                            listParametre: list = []
 
-                            for m2 in self.__regFunctionParam.finditer(group['key']):
-                                groupParam: dict = m2.groupdict()
-
-                                if groupParam['str_double'] != None:
-                                    listParametre.append(groupParam['str_double'])
-                                elif groupParam['str_single'] != None:
-                                    listParametre.append(groupParam['str_single'])
-                                elif groupParam['str_back'] != None:
-                                    listParametre.append(groupParam['str_back'])
-                                elif groupParam['bool'] != None:
-                                    typeBool: bool = bool(strtobool(groupParam['bool']))
-                                    listParametre.append(typeBool)
-                                elif groupParam['number'] != None:
-                                    if '.' in groupParam['number']:
-                                        number: float = float(groupParam['number'])
-                                    else:
-                                        number: int = int(groupParam['number'])
-                                    listParametre.append(number)
-                                elif groupParam['variable'] != None:
-                                    listParametre.append(str(self.__variables[groupParam['variable']]))
+                            listParametre: list = self.__typing(group['key'])
 
                             method = {func:func}
                             resultTextfunc = method[func](listParametre)
@@ -151,7 +157,7 @@ class TemplateStr:
 
     def parseCondition(self, text: str) -> str:
         '''
-        parse all the `{{#condition var}} value1 {{else}} value2 {{condition#}}` in the text give in
+        parse all the `{{#var1 == var2: value1 || value2 }}` in the text give in
 
         return -> str
         '''
@@ -162,18 +168,47 @@ class TemplateStr:
         for m in self.__regCondition.finditer(text):
             group: dict = m.groupdict()
 
-            match: str = group['match']
-            variable: str = group['variable']
-            keyStart: str = group['keyStart']
-            keyEnd: str = group['keyEnd']
+            match = group['match']
+            compValue1 = group['compValue1']
+            compValue2 = group['compValue2']
+            compSymbol = group['compSymbol']
+            resultValue1 = group['resultValue1']
+            resultValue2 = group['resultValue2']
 
-            if keyStart == keyEnd:
-                if keyStart == str(self.__variables[variable]):
-                    text = text.replace(match, group['resultValue1'])
+            listTyping = self.__typing(compValue1 + " " + compValue2)
+
+            if compSymbol == "==":
+                if listTyping[0] == listTyping[1]:
+                    text = text.replace(match, resultValue1)
                 else:
-                    text = text.replace(match, group['resultValue2'])
+                    text = text.replace(match, resultValue2)
+            elif compSymbol == "!=":
+                if listTyping[0] != listTyping[1]:
+                    text = text.replace(match, resultValue1)
+                else:
+                    text = text.replace(match, resultValue2)
+            elif compSymbol == "<=":
+                if listTyping[0] <= listTyping[1]:
+                    text = text.replace(match, resultValue1)
+                else:
+                    text = text.replace(match, resultValue2)
+            elif compSymbol == ">=":
+                if listTyping[0] >= listTyping[1]:
+                    text = text.replace(match, resultValue1)
+                else:
+                    text = text.replace(match, resultValue2)
+            elif compSymbol == "<":
+                if listTyping[0] < listTyping[1]:
+                    text = text.replace(match, resultValue1)
+                else:
+                    text = text.replace(match, resultValue2)
+            elif compSymbol == ">":
+                if listTyping[0] > listTyping[1]:
+                    text = text.replace(match, resultValue1)
+                else:
+                    text = text.replace(match, resultValue2)
             else:
-                sys.exit('The start key is different from the end key ({{#startKey}} ... {{endKey#}}) : ' + keyStart + ' != ' + keyEnd)
+                sys.exit('The ' + compSymbol + ' is not a valid comparator')
         
         return text
 

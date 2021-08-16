@@ -16,13 +16,13 @@ def testType(list:list) -> str:
 
     return 'YES'
 
-varDict: dict = {"varTest1":"hello", "varTest2":"Woww", "varTest3": 123, "varTest4": True}
+varDict: dict = {"varTest1":"hello", "varTest2":"Woww", "varTest3": 123, "varTest4": True, "varTest5": "oof"}
 
 funcs: list = [testType]
 
 parser = TemplateStr(functionList=funcs, variableDict=varDict)
 
-textFull: str = "{{@testType 'E' \"E\" `E` <b:True> <n:123> <n:123.4> varTest3 varTest4}} sir, {{$varTest1}} {{#ouf varTest2}} good morning {{else}} good night {{ouf#}}"
+textFull: str = "{{@testType 'E' \"E\" `E` <b:True> <n:123> <n:123.4> varTest3 varTest4}} sir, {{$varTest1}} {{#'oof' != varTest5: morning || good night }}"
 
 
 class TestParseMethode(unittest.TestCase):

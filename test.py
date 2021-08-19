@@ -16,13 +16,13 @@ def testType(list:list) -> str:
 
     return 'YES'
 
-varDict: dict = {"varTest1":"hello", "varTest2":"Woww", "varTest3": 123, "varTest4": True, "varTest5": "oof"}
+varDict: dict = {"varTest1":"hello", "varTest2":"Woww", "varTest3": 123, "varTest4": True, "varTest5": "c"}
 
 funcs: list = [testType]
 
 parser = TemplateStr(functionList=funcs, variableDict=varDict)
 
-textFull: str = "{{@testType 'E' \"E\" `E` <b:True> <n:123> <n:123.4> varTest3 varTest4}} sir, {{$varTest1}} {{#'oof' != varTest5: morning || good night }}"
+textFull: str = "{{@testType 'E' \"E\" `E` <b:True> <n:123> <n:123.4> varTest3 varTest4}} sir, {{$varTest1}} {{#'a' > <b:True>: yes || no }}"
 
 
 class TestParseMethode(unittest.TestCase):
@@ -33,7 +33,7 @@ class TestParseMethode(unittest.TestCase):
 
         print(result)
 
-        self.assertEqual(result, 'YES sir, hello good night')
+        self.assertEqual(result, 'YES sir, hello no')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

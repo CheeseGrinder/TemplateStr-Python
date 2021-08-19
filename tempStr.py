@@ -30,15 +30,49 @@ class TemplateStr:
         self.__functions = functionList
         self.__variables = variableDict
 
-    def __presence(self, list: list) -> Tuple[bool, list]:
+    def __presence(self, lists: list) -> Tuple[bool, list]:
         presences: list = []
-        if list != []:
-            for value in list:
+        if lists != []:
+            for value in lists:
                 presences.append(value[0])
             
-            return [True, presences]
+            return (True, presences)
         else:
-            return [False, None]
+            return (False, lists)
+
+    def __convertAnyToFloat(self, value1, value2) -> Tuple[float, float]:
+
+        if isinstance(value1, int) or isinstance(value1, float):
+            if isinstance(value2, int) or isinstance(value2, float):
+                return (float(value1), float(value2))
+            elif isinstance(value2, bool):
+                return (float(value1), float(int(value2 == True)))
+            elif isinstance(value2, str):
+                return (float(value1), float(len(value2)))
+            else:
+                return (0, 0)
+        elif isinstance(value1, bool):
+            value1 = float(int(value1 == True))
+            if isinstance(value2, int) or isinstance(value2, float):
+                return (value1, float(value2))
+            elif isinstance(value2, bool):
+                return (value1, float(int(value2 == True)))
+            elif isinstance(value2, str):
+                return (value1, float(len(value2)))
+            else:
+                return (0, 0)
+        elif isinstance(value1, str):
+            value1 = float(len(value1))
+            if isinstance(value2, int) or isinstance(value2, float):
+                return (value1, float(value2))
+            elif isinstance(value2, bool):
+                return (value1, float(int(value2 == True)))
+            elif isinstance(value2, str):
+                return (value1, float(len(value2)))
+            else:
+                return (0, 0)
+        else:
+            return (0, 0)
 
     def __typing(self, string: str) -> list:
 
@@ -187,28 +221,30 @@ class TemplateStr:
                     text = text.replace(match, resultValue1)
                 else:
                     text = text.replace(match, resultValue2)
-            elif compSymbol == "<=":
-                if listTyping[0] <= listTyping[1]:
-                    text = text.replace(match, resultValue1)
-                else:
-                    text = text.replace(match, resultValue2)
-            elif compSymbol == ">=":
-                if listTyping[0] >= listTyping[1]:
-                    text = text.replace(match, resultValue1)
-                else:
-                    text = text.replace(match, resultValue2)
-            elif compSymbol == "<":
-                if listTyping[0] < listTyping[1]:
-                    text = text.replace(match, resultValue1)
-                else:
-                    text = text.replace(match, resultValue2)
-            elif compSymbol == ">":
-                if listTyping[0] > listTyping[1]:
-                    text = text.replace(match, resultValue1)
-                else:
-                    text = text.replace(match, resultValue2)
             else:
-                sys.exit('The ' + compSymbol + ' is not a valid comparator')
+                value = self.__convertAnyToFloat(listTyping[0], listTyping[1])
+                if compSymbol == "<=":
+                    if value[0] <= value[1]:
+                        text = text.replace(match, resultValue1)
+                    else:
+                        text = text.replace(match, resultValue2)
+                elif compSymbol == ">=":
+                    if value[0] >= value[1]:
+                        text = text.replace(match, resultValue1)
+                    else:
+                        text = text.replace(match, resultValue2)
+                elif compSymbol == "<":
+                    if value[0] < value[1]:
+                        text = text.replace(match, resultValue1)
+                    else:
+                        text = text.replace(match, resultValue2)
+                elif compSymbol == ">":
+                    if value[0] > value[1]:
+                        text = text.replace(match, resultValue1)
+                    else:
+                        text = text.replace(match, resultValue2)
+                else:
+                    sys.exit('The ' + compSymbol + ' is not a valid comparator')
         
         return text
 

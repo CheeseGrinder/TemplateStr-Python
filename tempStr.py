@@ -39,7 +39,8 @@ class TemplateStr:
 
     def __convertAnyToFloat(self, value1: Any, value2: Any) -> Tuple[float, float]:
 
-        result: list = [0, 0]
+        result1: float = 0.0
+        result2: float = 0.0
 
         if isinstance(value1, int) or isinstance(value1, float):
             result1 = float(value1)
@@ -307,9 +308,6 @@ class TemplateStr:
         '''
         Detects if there is the presence of `{{$variable}}`
 
-        bool : `true` or `false`
-        list : `[match1, match2, ...]`
-
         return -> bool
         '''
 
@@ -338,7 +336,8 @@ class TemplateStr:
     
     def hasSwitch(self, text: str) -> bool:
         '''
-        Detects if there is the presence of `{{?var: value1=#0F0, value2=#00F, ..., default=#000}}`
+        Detects if there is the presence of `{{?var: value1=#0F0, value2=#00F, ..., default=#000}}` or
+        `{{?var:int; 56=#0F0, 32=#00F, ..., default=#000}}`
 
         return -> bool
         '''

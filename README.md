@@ -4,6 +4,7 @@
 
 <div align="center">
     <img src="https://img.shields.io/badge/Python-v3.8%5E-green?style=flat-square&logo=python&logoColor=ffd13e&labelColor=3470a2&color=5c5c5c"/>
+    <img src="https://img.shields.io/github/downloads/CheeseGrinder/TemplateStr-Python/total?style=flat-square"/>
 </div>
 
 <strong>Import : </strong>

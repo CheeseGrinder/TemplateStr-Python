@@ -2,8 +2,6 @@ import unittest
 from tempStr import TemplateStr
 from time import strftime, localtime
 
-print("\n-------------------------------- Test --------------------------------\n")
-
 varDict: dict = {
     "name": "Jame",
     "age": 32, 

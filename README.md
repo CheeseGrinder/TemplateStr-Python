@@ -4,7 +4,10 @@
 
 <div align="center">
     <img src="https://img.shields.io/badge/Python-v3.8%5E-green?style=flat-square&logo=python&logoColor=ffd13e&labelColor=3470a2&color=5c5c5c"/>
-    <img src="https://img.shields.io/github/downloads/CheeseGrinder/TemplateStr-Python/total?style=flat-square"/>
+    <img src="https://img.shields.io/github/downloads/CheeseGrinder/TemplateStr-Python/total?label=Download&style=flat-square"/>
+    <a href="https://github.com/CheeseGrinder/TemplateStr-Python/actions/workflows/python-app.yml">
+        <img src="https://img.shields.io/github/workflow/status/CheeseGrinder/TemplateStr-Python/Python test?label=Test&style=flat-square"/>
+    </a>
 </div>
 
 <strong>Import : </strong>

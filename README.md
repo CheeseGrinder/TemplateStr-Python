@@ -1,6 +1,6 @@
 # TemplateStr-Python
 
-### TemplateStr allows to add variable, function and condition in a string, useful in config files.
+### TemplateStr allows to add variable, function and condition in a string.
 
 <div align="center">
     <img src="https://img.shields.io/badge/Python-v3.8%5E-green?style=flat-square&logo=python&logoColor=ffd13e&labelColor=3470a2&color=5c5c5c"/>

@@ -187,7 +187,7 @@ class TemplateStr:
             elif functionName == 'uppercaseFirst': text = text.replace(match, value.capitalize())
             elif functionName == 'lowercase': text = text.replace(match, value.lower())
             elif functionName == 'casefold': text = text.replace(match, value.casefold())
-            elif functionName == 'swapcase': text = text.replace(match, value.swapcase())
+            # elif functionName == 'swapcase': text = text.replace(match, value.swapcase())
             elif functionName == 'time': text = text.replace(match, strftime("%H:%M:%S", localtime()))
             elif functionName == 'date': text = text.replace(match, strftime("%d/%m/%Y", localtime()))
             elif functionName == 'dateTime': text = text.replace(match, strftime("%d/%m/%Y,%H:%M:%S", localtime()))

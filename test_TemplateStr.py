@@ -9,7 +9,7 @@ varDict: dict = {
     "lower": "azerty", 
     "upper": "AZERTY", 
     "swap": "AzErTy",
-    "cfold": "grüßen",
+    # "cfold": "grüßen",
     "Build": "Succes",
     "dict": {"value": "dict in dict"},
     "dictMaster": {"dict1": {"value": "dict in dict in dict"}},
@@ -67,7 +67,7 @@ class TestParseMethode(unittest.TestCase):
         uppercase2: list = ["{{@uppercase dict.value}}", "DICT IN DICT"]
         uppercaseFirst: list = ["{{@uppercaseFirst lower}}", "Azerty"]
         lowercase: list = ["{{@lowercase upper}}", "azerty"]
-        casefold: list = ["{{@casefold cfold}}", "grüssen"]
+        # casefold: list = ["{{@casefold cfold}}", "grüssen"]
         swapcase: list = ["{{@swapcase swap}}", "aZeRtY"]
         time: str = "{{@time}}"
         date: str = "{{@date}}"
@@ -79,7 +79,7 @@ class TestParseMethode(unittest.TestCase):
         self.assertEqual(parser.parseFunction(uppercase2[0]), uppercase2[1], "uppercase2")
         self.assertEqual(parser.parseFunction(uppercaseFirst[0]), uppercaseFirst[1], "uppercaseFirst")
         self.assertEqual(parser.parseFunction(lowercase[0]), lowercase[1], "lowercase")
-        self.assertEqual(parser.parseFunction(casefold[0]), casefold[1], "casefold")
+        # self.assertEqual(parser.parseFunction(casefold[0]), casefold[1], "casefold")
         self.assertEqual(parser.parseFunction(swapcase[0]), swapcase[1], "swapcase")
         self.assertEqual(parser.parseFunction(time), strftime("%H:%M:%S", localtime()), "time")
         self.assertEqual(parser.parseFunction(date), strftime("%d/%m/%Y", localtime()), "date")

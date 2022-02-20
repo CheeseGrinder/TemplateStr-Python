@@ -32,10 +32,10 @@ parser.parse(text)
 ```
 
 - `parse(text: str) -> str` : parse all (variable, function, condition and switch)
-- `parseVariable(text: str) -> str` : parse Variable ; {{$variable}}
-- `parseFunction(text: str) -> str` : parse Function ; {{@function}}
-- `parseCondition(text: str) -> str` : parse Condition ; {{#var1 == var2: value1 || value2}}
-- `parseSwitch(text: str) -> str` : parse Switch ; {{?var; value1=#0F0, 56=#00F, ..., default=#000}}
+- `parseVariable(text: str) -> str` : parse Variable ; ${{variable}}
+- `parseFunction(text: str) -> str` : parse Function ; @{{function}}
+- `parseCondition(text: str) -> str` : parse Condition ; #{{var1 == var2: value1 || value2}}
+- `parseSwitch(text: str) -> str` : parse Switch ; ?{{var; value1=#0F0, 56=#00F, ..., default=#000}}
 - `hasVariable(text: str) -> bool` : check if there are any Variable
 - `hasFunction(text: str) -> bool` : check if there are any Function
 - `hasCondition(text: str) -> bool` : check if there are any Condition
@@ -48,9 +48,9 @@ parser.parse(text)
 </br>
 
 The syntax of the Variables is like if : 
-- `{{$variable}}` 
-- `{{$dict.variable}}`
-- `{{$dictM.dict1.variable. ...}}`
+- `${{variable}}` 
+- `${{dict.variable}}`
+- `${{dictM.dict1.variable. ...}}`
 
 if the value does not exist then `None` is return
 
@@ -61,7 +61,7 @@ varDict = {
     'variable':'yes'
 }
 
-text = 'are you a variable : {{$variable}}'
+text = 'are you a variable : ${{variable}}'
 
 parser = TemplateStr(variableDict=varDict)
 
@@ -77,7 +77,7 @@ varDict = {
     }
 }
 
-text = 'are you a variable : {{$variable.value}}'
+text = 'are you a variable : ${{variable.value}}'
 
 parser = TemplateStr(variableDict=varDict)
 
@@ -102,24 +102,24 @@ are you a variable : yes
 <summary><strong>Function</strong></summary>
 </br>
 
-The syntax of the Function is like if : `{{@function variable}}`
+The syntax of the Function is like if : `@{{function variable}}`
 
 list of basic functions : 
-- `{{@uppercase variable}}`
-- `{{@uppercaseFirst variable}}`
-- `{{@lowercase variable}}`
-<!-- - `{{@casefold variable}}` -->
-- `{{@swapcase variable}}`
-- `{{@time}}`
-- `{{@date}}`
-- `{{@dateTime}}`
+- `@{{uppercase variable}}`
+- `@{{uppercaseFirst variable}}`
+- `@{{lowercase variable}}`
+<!-- - `@{{casefold variable}}` -->
+- `@{{swapcase variable}}`
+- `@{{time}}`
+- `@{{date}}`
+- `@{{dateTime}}`
 
 ```python
 from PyTempStr import TemplateStr
 
 varDict = {'variable':'no'}
 
-text = 'is lower case : {{@uppercase variable}}'
+text = 'is lower case : @{{uppercase variable}}'
 
 parser = TemplateStr(variableDict=varDict)
 
@@ -143,7 +143,7 @@ is lower case : NO
 <summary><strong>Custom Function</strong></summary>
 </br>
 
-The syntax of the Custom Function is like if : `{{@customFunction param1 param2 ...}}`
+The syntax of the Custom Function is like if : `@{{customFunction param1 param2 ...}}`
 
 `Typing` can be used at the parameter level of custom functions
 
@@ -157,7 +157,7 @@ from PyTempStr import TemplateStr
 def customFunc(list: list) -> str:
     return list[0].replace('no', 'maybe')
 
-text = 'are you a customFunction : {{@customFunc "no"}}'
+text = 'are you a customFunction : @{{customFunc "no"}}'
 
 parser = TemplateStr(functionList=[customFunc])
 
@@ -176,7 +176,7 @@ are you a customFunction : maybe
 </br>
 
 The syntax of the Condition is like if : 
-- `{{#var1 == var2: value1 || value2}}`
+- `#{{var1 == var2: value1 || value2}}`
 
 comparator:
 - `==`
@@ -200,7 +200,7 @@ from PyTempStr import TemplateStr
 
 varDict = {'var1':'no', 'var2':'o2'}
 
-text = 'are you a variable : {{#"test" == var2: yes || no}}'
+text = 'are you a variable : #{{"test" == var2: yes || no}}'
 
 parser = TemplateStr(variableDict=varDict)
 
@@ -230,8 +230,8 @@ are you a variable : no
 </br>
 
 The syntax of the Switch is like if : 
-- `{{?var; value1=#0F0, 56=#00F, ..., default=#000}}`
-- `{{?var:type; 16=#0F0, 56=#00F, ..., default=#000}}`
+- `?{{var; value1=#0F0, 56=#00F, ..., default=#000}}`
+- `?{{var:type; 16=#0F0, 56=#00F, ..., default=#000}}`
 
 `var` can be typed, if it is typed then all the `values` will be typed of the same type
 
@@ -247,7 +247,7 @@ varDict = {
     'variable':'yes'
 }
 
-text = '=( {{?variable; yes=#A, no=#B, maybe=#C, default=#000}} )='
+text = '=( ?{{variable; yes=#A, no=#B, maybe=#C, default=#000}} )='
 
 parser = TemplateStr(variableDict=varDict)
 
@@ -261,7 +261,7 @@ varDict = {
     'variable': 42
 }
 
-text = '=( {{?variable:int; 42=#A, 32=#B, 22=#C, default=#000}} )='
+text = '=( ?{{variable:int; 42=#A, 32=#B, 22=#C, default=#000}} )='
 
 parser = TemplateStr(variableDict=varDict)
 

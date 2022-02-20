@@ -8,10 +8,10 @@ class TemplateStr:
 
     __functions: list
     __variables: dict
-    __regVariable: Pattern = regex.compile(r'(?P<match>{{\$(?P<key>[^{$}]+)}})')
-    __regFunction: Pattern = regex.compile(r'(?P<match>{{@(?P<function>[^{@}\s]+) ?(?P<key>[^{@}]+)?}})')
-    __regCondition: Pattern = regex.compile(r'(?P<match>{{#(?P<compValue1>[^{#}]+) (?P<compSymbol>[=!<>][=]?) (?P<compValue2>[^{#}]+): (?P<resultValue1>[^{}]+) \|\| (?P<resultValue2>[^{}]+)}})')
-    __regSwitch: Pattern = regex.compile(r'(?P<match>{{\?(?:(?P<key>[^{?}:]+)|(?P<keyTyped>[^{?}]+):(?P<type>str|int|float)); (?P<val>(?:[^{}]+)=(?:[^{}]+)), default=(?P<default>[^{}]+)}})')
+    __regVariable: Pattern = regex.compile(r'(?P<match>\${{(?P<key>[^{$}]+)}})')
+    __regFunction: Pattern = regex.compile(r'(?P<match>@{{(?P<function>[^{@}\s]+) ?(?P<key>[^{@}]+)?}})')
+    __regCondition: Pattern = regex.compile(r'(?P<match>#{{(?P<compValue1>[^{#}]+) (?P<compSymbol>[=!<>][=]?) (?P<compValue2>[^{#}]+): (?P<resultValue1>[^{}]+) \|\| (?P<resultValue2>[^{}]+)}})')
+    __regSwitch: Pattern = regex.compile(r'(?P<match>\?{{(?:(?P<key>[^{?}:]+)|(?P<keyTyped>[^{?}]+):(?P<type>str|int|float)); (?P<val>(?:[^{}]+)=(?:[^{}]+)), default=(?P<default>[^{}]+)}})')
     __regTyping: Pattern = regex.compile(r'\"(?P<str_double>[^\"]+)\"|\'(?P<str_single>[^\']+)\'|`(?P<str_back>[^`]+)`|<b:(?P<bool>True|False)>|<n:(?P<number>[0-9_.]+)>|(?P<variable>[^<>\" ]+)')
 
     def __init__(self, functionList: list = [], variableDict: dict = {}):
@@ -186,8 +186,8 @@ class TemplateStr:
             if functionName == 'uppercase': text = text.replace(match, value.upper())
             elif functionName == 'uppercaseFirst': text = text.replace(match, value.capitalize())
             elif functionName == 'lowercase': text = text.replace(match, value.lower())
-            elif functionName == 'casefold': text = text.replace(match, value.casefold())
-            # elif functionName == 'swapcase': text = text.replace(match, value.swapcase())
+            # elif functionName == 'casefold': text = text.replace(match, value.casefold())
+            elif functionName == 'swapcase': text = text.replace(match, value.swapcase())
             elif functionName == 'time': text = text.replace(match, strftime("%H:%M:%S", localtime()))
             elif functionName == 'date': text = text.replace(match, strftime("%d/%m/%Y", localtime()))
             elif functionName == 'dateTime': text = text.replace(match, strftime("%d/%m/%Y,%H:%M:%S", localtime()))

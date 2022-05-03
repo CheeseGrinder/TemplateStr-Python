@@ -3,6 +3,7 @@ from tempStr import TemplateStr
 from time import strftime, localtime
 
 varDict: dict = {
+    "var": "age",
     "name": "Jame",
     "age": 32, 
     "bool": True, 
@@ -40,10 +41,21 @@ class TestParseMethode(unittest.TestCase):
 
         text_1: list = ["Hello my name is @{{uppercase name}}, I am ${{age}} years old. my Dict: ${{dict.value}}. my keyboard: #{{lower == 'azerty': azerty || qwerty}}, ?{{lower; azerty=yes, AZERTY=no, default=anyway}}",
              "Hello my name is JAME, I am 32 years old. my Dict: dict in dict. my keyboard: azerty, yes"]
+        text_2: list = ["test var in var ${{${{var}}}}", "test var in var 32"]
+        text_3: list = ["test func in func @{{lowercase @{{uppercase name}}}}", "test func in func jame"]
+        text_4: list = ["test if in if #{{lower == 'azerty2': azerty || #{{lower == 'querty': yes || no}}}}", "test if in if no"]
+        text_5: list = ["test switch in switch ?{{name; Jame=?{{Build; Succes=#0, Failed:=#1, default=#default}}, Tony=#1, Marco=#2, default=#default}}", "test switch in switch #0"]
+        text_6: list = ["test wtf ?{{name; Jame=?{{${{var}}:int; 32=#0, 36=#1, default=#default}}, Tony=#1, Marco=#2, default=#default2}}", "test wtf #0"]
+        
 
         parser = TemplateStr(funcs, varDict)
 
         self.assertEqual(parser.parse(text_1[0]), text_1[1], "text_1")
+        self.assertEqual(parser.parse(text_2[0]), text_2[1], "text_2")
+        self.assertEqual(parser.parse(text_3[0]), text_3[1], "text_3")
+        self.assertEqual(parser.parse(text_4[0]), text_4[1], "text_4")
+        self.assertEqual(parser.parse(text_5[0]), text_5[1], "text_5")
+        self.assertEqual(parser.parse(text_6[0]), text_6[1], "text_6")
 
     def testVariable(self):
 
@@ -452,7 +464,7 @@ class TestParseMethode(unittest.TestCase):
         self.assertEqual(parser.parseCondition(bool_Inferior_2_Bool[0]), bool_Inferior_2_Bool[1], "bool_Superior_2_Bool")
 
     def testSwitch(self):
-        text_Switch_1: list = ["?{{name; Jame=#0, Tony:=#1, Marco:=#2, default=#default}}", "#0"]
+        text_Switch_1: list = ["?{{name; Jame=#0, Tony=#1, Marco=#2, default=#default}}", "#0"]
         text_Switch_2: list = ["?{{age:int; 56=#0, 36=#1, 32=#2, default=#default}}", "#2"]
         text_Switch_3: list = ["?{{lower:str; azertY=#0, Azerty=#1, AzErTy=#2, default=#default}}", "#default"]
 
@@ -514,6 +526,7 @@ class TestHasMethode(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    print("\n----------------------------------------------------------------------\n")
     test_order = [
         "testAll",
         "testVariable", 

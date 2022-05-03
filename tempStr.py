@@ -125,18 +125,18 @@ class TemplateStr:
 
         return -> str
         '''
+        while self.hasAll(text):
+            # parse Variable
+            text = self.parseVariable(text)
 
-        # parse Variable
-        text = self.parseVariable(text)
+            # parse Function
+            text = self.parseFunction(text)
 
-        # parse Function
-        text = self.parseFunction(text)
+            # parse Condition
+            text = self.parseCondition(text)
 
-        # parse Condition
-        text = self.parseCondition(text)
-
-        # parse Condition
-        text = self.parseSwitch(text)
+            # parse Condition
+            text = self.parseSwitch(text)
 
         return text
 
@@ -150,13 +150,14 @@ class TemplateStr:
         if not self.hasVariable(text): return text
 
         # parse Variable
-        for m in self.__regVariable.finditer(text):
-            group: dict = m.groupdict()
+        while self.hasVariable(text):
+            for m in self.__regVariable.finditer(text):
+                group: dict = m.groupdict()
 
-            match: str = group['match']
-            key: str = group['key']
+                match: str = group['match']
+                key: str = group['key']
 
-            text = text.replace(match, str(self.__getVariable(key)))
+                text = text.replace(match, str(self.__getVariable(key)))        
 
         return text
 
@@ -170,49 +171,50 @@ class TemplateStr:
         if not self.hasFunction(text): return text
 
         # parse Function
-        for m in self.__regFunction.finditer(text):
-            group: dict = m.groupdict()
+        while self.hasFunction(text):
+            for m in self.__regFunction.finditer(text):
+                group: dict = m.groupdict()
 
-            match: str = group['match']
-            key: str = group['key']
+                match: str = group['match']
+                key: str = group['key']
 
 
 
-            if key != None and self.__getVariable(key) != "None":
-                value: str = self.__getVariable(key)
+                if key != None and self.__getVariable(key) != "None":
+                    value: str = self.__getVariable(key)
 
-            functionName: str = group['function']
+                functionName: str = group['function']
 
-            if functionName == 'uppercase': text = text.replace(match, value.upper())
-            elif functionName == 'uppercaseFirst': text = text.replace(match, value.capitalize())
-            elif functionName == 'lowercase': text = text.replace(match, value.lower())
-            # elif functionName == 'casefold': text = text.replace(match, value.casefold())
-            elif functionName == 'swapcase': text = text.replace(match, value.swapcase())
-            elif functionName == 'time': text = text.replace(match, strftime("%H:%M:%S", localtime()))
-            elif functionName == 'date': text = text.replace(match, strftime("%d/%m/%Y", localtime()))
-            elif functionName == 'dateTime': text = text.replace(match, strftime("%d/%m/%Y,%H:%M:%S", localtime()))
-            elif functionName in str(self.__functions):
-                for func in self.__functions:
-                    
-                    if regex.search(r'(?<!\S){}(?!\S)'.format(functionName), str(func)) != None:
+                if functionName == 'uppercase': text = text.replace(match, value.upper())
+                elif functionName == 'uppercaseFirst': text = text.replace(match, value.capitalize())
+                elif functionName == 'lowercase': text = text.replace(match, value.lower())
+                # elif functionName == 'casefold': text = text.replace(match, value.casefold())
+                elif functionName == 'swapcase': text = text.replace(match, value.swapcase())
+                elif functionName == 'time': text = text.replace(match, strftime("%H:%M:%S", localtime()))
+                elif functionName == 'date': text = text.replace(match, strftime("%d/%m/%Y", localtime()))
+                elif functionName == 'dateTime': text = text.replace(match, strftime("%d/%m/%Y,%H:%M:%S", localtime()))
+                elif functionName in str(self.__functions):
+                    for func in self.__functions:
+                        
+                        if regex.search(r'(?<!\S){}(?!\S)'.format(functionName), str(func)) != None:
 
-                        if key != None:
+                            if key != None:
 
-                            listParametre: list = self.__typing(key)
+                                listParametre: list = self.__typing(key)
 
-                            method = {func:func}
-                            resultTextfunc = method[func](listParametre)
-                        else:
-                            method = {func:func}
-                            resultTextfunc = method[func]()
+                                method = {func:func}
+                                resultTextfunc = method[func](listParametre)
+                            else:
+                                method = {func:func}
+                                resultTextfunc = method[func]()
 
-                        if resultTextfunc != None:
-                            text = text.replace(m.groupdict()['match'], resultTextfunc)
-                        else:
-                            sys.exit('The '+ functionName + ' function must return a string')
-            else:
-                sys.exit('The ' + functionName + ' function does not exist')
-        
+                            if resultTextfunc != None:
+                                text = text.replace(m.groupdict()['match'], resultTextfunc)
+                            else:
+                                sys.exit('The '+ functionName + ' function must return a string')
+                else:
+                    sys.exit('The ' + functionName + ' function does not exist')
+            
         return text
 
     def parseCondition(self, text: str) -> str:
@@ -225,34 +227,35 @@ class TemplateStr:
         if not self.hasCondition(text): return text
 
         # parse Condition
-        for m in self.__regCondition.finditer(text):
-            group: dict = m.groupdict()
+        while self.hasCondition(text):
+            for m in self.__regCondition.finditer(text):
+                group: dict = m.groupdict()
 
-            match = group['match']
-            compValue1 = group['compValue1']
-            compValue2 = group['compValue2']
-            compSymbol = group['compSymbol']
-            resultValue1 = group['resultValue1']
-            resultValue2 = group['resultValue2']
+                match = group['match']
+                compValue1 = group['compValue1']
+                compValue2 = group['compValue2']
+                compSymbol = group['compSymbol']
+                resultValue1 = group['resultValue1']
+                resultValue2 = group['resultValue2']
 
-            listTyping = self.__typing(compValue1 + " " + compValue2)
+                listTyping = self.__typing(compValue1 + " " + compValue2)
 
-            if compSymbol == "==":
-                text = text.replace(match, resultValue1 if listTyping[0] == listTyping[1] else resultValue2)
-            elif compSymbol == "!=":
-                text = text.replace(match, resultValue1 if listTyping[0] != listTyping[1] else resultValue2)
-            else:
-                value1, value2 = self.__convertAnyToFloat(listTyping[0], listTyping[1])
-                if compSymbol == "<=":
-                    text = text.replace(match, resultValue1 if value1 <= value2 else resultValue2)
-                elif compSymbol == ">=":
-                    text = text.replace(match, resultValue1 if value1 >= value2 else resultValue2)
-                elif compSymbol == "<":
-                    text = text.replace(match, resultValue1 if value1 < value2 else resultValue2)
-                elif compSymbol == ">":
-                    text = text.replace(match, resultValue1 if value1 > value2 else resultValue2)
+                if compSymbol == "==":
+                    text = text.replace(match, resultValue1 if listTyping[0] == listTyping[1] else resultValue2)
+                elif compSymbol == "!=":
+                    text = text.replace(match, resultValue1 if listTyping[0] != listTyping[1] else resultValue2)
                 else:
-                    sys.exit('The ' + compSymbol + ' is not a valid comparator')
+                    value1, value2 = self.__convertAnyToFloat(listTyping[0], listTyping[1])
+                    if compSymbol == "<=":
+                        text = text.replace(match, resultValue1 if value1 <= value2 else resultValue2)
+                    elif compSymbol == ">=":
+                        text = text.replace(match, resultValue1 if value1 >= value2 else resultValue2)
+                    elif compSymbol == "<":
+                        text = text.replace(match, resultValue1 if value1 < value2 else resultValue2)
+                    elif compSymbol == ">":
+                        text = text.replace(match, resultValue1 if value1 > value2 else resultValue2)
+                    else:
+                        sys.exit('The ' + compSymbol + ' is not a valid comparator')
 
         return text
 
@@ -265,42 +268,44 @@ class TemplateStr:
 
         if not self.hasSwitch(text): return text
 
-        for m in self.__regSwitch.finditer(text):
-            group: dict = m.groupdict()
+        # parse Switch
+        while self.hasSwitch(text):
+            for m in self.__regSwitch.finditer(text):
+                group: dict = m.groupdict()
 
-            match = group['match']
+                match = group['match']
 
-            dictTemp = {}
+                dictTemp = {}
 
-            for n in group["val"].split(", "):
-                key, value = n.split("=")
-                dictTemp[key] = value
+                for n in group["val"].split(", "):
+                    key, value = n.split("=")
+                    dictTemp[key] = value
 
 
-            if group['key'] != None:
-                keyVar = group['key']
+                if group['key'] != None:
+                    keyVar = group['key']
 
-                for key in dictTemp.keys():
-                    
-                    if key == str(self.__getVariable(keyVar)):
-                        result = dictTemp[key]
-                        break
-                    else:
-                        result = group['default']
+                    for key in dictTemp.keys():
+                        
+                        if key == str(self.__getVariable(keyVar)):
+                            result = dictTemp[key]
+                            break
+                        else:
+                            result = group['default']
 
-            elif group['keyTyped'] != None:
-                keyVar = group['keyTyped']
-                typeVar = group['type']
+                elif group['keyTyped'] != None:
+                    keyVar = group['keyTyped']
+                    typeVar = group['type']
 
-                for key in dictTemp.keys():
-                    
-                    if self.__typing(key, typeVar)[0] == self.__getVariable(keyVar):
-                        result = dictTemp[key]
-                        break
-                    else:
-                        result = group['default']
+                    for key in dictTemp.keys():
+                        
+                        if self.__typing(key, typeVar)[0] == self.__getVariable(keyVar):
+                            result = dictTemp[key]
+                            break
+                        else:
+                            result = group['default']
 
-            text = text.replace(match, result)
+                text = text.replace(match, result)
 
         return text
 
@@ -344,4 +349,10 @@ class TemplateStr:
 
         find: list = regex.findall(self.__regSwitch, text)
         return self.__presence(find)
+
+    def hasAll(self, text: str) -> bool:
+
+        if self.hasVariable(text) or self.hasFunction(text) or self.hasCondition(text) or self.hasSwitch(text):
+            return True
+        return False
 

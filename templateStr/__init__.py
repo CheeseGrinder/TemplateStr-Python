@@ -82,7 +82,7 @@ class TemplateStr:
                         number: int = int(groupParam['number'])
                     list_temp.append(number)
                 elif groupParam['variable'] != None:
-                    list_temp.append(str(self.__getVariable(groupParam['variable'])))
+                    list_temp.append(str(self.__getVariable(groupParam['variable'])[0]))
 
         elif typing == "int":
             number: int = int(string)
@@ -102,7 +102,10 @@ class TemplateStr:
 
         return list_temp
 
-    def __getVariable(self, key: str) -> Any:
+    def __getVariable(self, key: str) -> Tuple[Any, bool]:
+
+        ok: bool = True
+
         try:
             if '.' in key and not key.isspace():
                 keyList = key.split('.')
@@ -115,9 +118,10 @@ class TemplateStr:
             else:
                 fvalue = self.__variables[key]
         except KeyError:
-            fvalue = "None"
+            ok = False
+            fvalue = f"[key '{key}' not exist]"
 
-        return fvalue
+        return (fvalue, ok)
 
     def parse(self, text: str) -> str:
         '''
@@ -157,7 +161,7 @@ class TemplateStr:
                 match: str = group['match']
                 key: str = group['key']
 
-                text = text.replace(match, str(self.__getVariable(key)))        
+                text = text.replace(match, str(self.__getVariable(key)[0]))
 
         return text
 
@@ -180,8 +184,8 @@ class TemplateStr:
 
 
 
-                if key != None and self.__getVariable(key) != "None":
-                    value: str = self.__getVariable(key)
+                if key != None and self.__getVariable(key)[1]:
+                    value: str = self.__getVariable(key)[0]
 
                 functionName: str = group['function']
 
@@ -287,7 +291,7 @@ class TemplateStr:
 
                     for key in dictTemp.keys():
                         
-                        if key == str(self.__getVariable(keyVar)):
+                        if key == str(self.__getVariable(keyVar)[0]):
                             result = dictTemp[key]
                             break
                         else:
@@ -299,7 +303,7 @@ class TemplateStr:
 
                     for key in dictTemp.keys():
                         
-                        if self.__typing(key, typeVar)[0] == self.__getVariable(keyVar):
+                        if self.__typing(key, typeVar)[0] == self.__getVariable(keyVar)[0]:
                             result = dictTemp[key]
                             break
                         else:
@@ -308,6 +312,12 @@ class TemplateStr:
                 text = text.replace(match, result)
 
         return text
+
+    def hasAll(self, text: str) -> bool:
+
+        if self.hasVariable(text) or self.hasFunction(text) or self.hasCondition(text) or self.hasSwitch(text):
+            return True
+        return False
 
     def hasVariable(self, text: str) -> bool:
         '''
@@ -349,10 +359,3 @@ class TemplateStr:
 
         find: list = regex.findall(self.__regSwitch, text)
         return self.__presence(find)
-
-    def hasAll(self, text: str) -> bool:
-
-        if self.hasVariable(text) or self.hasFunction(text) or self.hasCondition(text) or self.hasSwitch(text):
-            return True
-        return False
-

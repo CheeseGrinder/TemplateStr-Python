@@ -1,19 +1,20 @@
 import unittest
-from tempStr import TemplateStr
+from templateStr import TemplateStr
 from time import strftime, localtime
 
 varDict: dict = {
-    "var": "age",
-    "name": "Jame",
-    "age": 32, 
+    "Build": "Succes",
+    "var": "int",
+    "str": "Jame",
+    "int": 32,
+    "float": 4.2,
     "bool": True, 
     "lower": "azerty", 
     "upper": "AZERTY", 
     "swap": "AzErTy",
     # "cfold": "grüßen",
-    "Build": "Succes",
-    "dict": {"value": "dict in dict"},
-    "dictMaster": {"dict1": {"value": "dict in dict in dict"}},
+    "Dict": {"value": "Dict in Dict"},
+    "MasterDict": {"SecondDict": {"value": "Dict in Dict in Dict"}},
 }
 
 def test() -> str:
@@ -39,14 +40,13 @@ class TestParseMethode(unittest.TestCase):
 
     def testAll(self):
 
-        text_1: list = ["Hello my name is @{{uppercase name}}, I am ${{age}} years old. my Dict: ${{dict.value}}. my keyboard: #{{lower == 'azerty': azerty || qwerty}}, ?{{lower; azerty=yes, AZERTY=no, default=anyway}}",
-             "Hello my name is JAME, I am 32 years old. my Dict: dict in dict. my keyboard: azerty, yes"]
+        text_1: list = ["Hello my name is @{{uppercase str}}, I am ${{int}} years old. my Dict: ${{Dict.value}}. my keyboard: #{{lower == 'azerty': azerty || qwerty}}, ?{{lower; azerty=yes, AZERTY=no, default=anyway}}",
+             "Hello my name is JAME, I am 32 years old. my Dict: Dict in Dict. my keyboard: azerty, yes"]
         text_2: list = ["test var in var ${{${{var}}}}", "test var in var 32"]
-        text_3: list = ["test func in func @{{lowercase @{{uppercase name}}}}", "test func in func jame"]
+        text_3: list = ["test func in func @{{lowercase @{{uppercase str}}}}", "test func in func jame"]
         text_4: list = ["test if in if #{{lower == 'azerty2': azerty || #{{lower == 'querty': yes || no}}}}", "test if in if no"]
-        text_5: list = ["test switch in switch ?{{name; Jame=?{{Build; Succes=#0, Failed:=#1, default=#default}}, Tony=#1, Marco=#2, default=#default}}", "test switch in switch #0"]
-        text_6: list = ["test wtf ?{{name; Jame=?{{${{var}}:int; 32=#0, 36=#1, default=#default}}, Tony=#1, Marco=#2, default=#default2}}", "test wtf #0"]
-        
+        text_5: list = ["test switch in switch ?{{str; Jame=?{{Build; Succes=#0, Failed:=#1, default=#default}}, Tony=#1, Marco=#2, default=#default}}", "test switch in switch #0"]
+        text_6: list = ["test wtf ?{{str; Jame=?{{${{var}}:int; 32=#0, 36=#1, default=#default}}, Tony=#1, Marco=#2, default=#default2}}", "test wtf #0"]
 
         parser = TemplateStr(funcs, varDict)
 
@@ -59,11 +59,11 @@ class TestParseMethode(unittest.TestCase):
 
     def testVariable(self):
 
-        text_1: list = ["var bool = ${{bool}} and name = ${{name}}", "var bool = True and name = Jame"]
-        text_2: list = ["${{dict.value}}", "dict in dict"]
-        text_3: list = ["${{dictMaster.dict1.value}}", "dict in dict in dict"]
-        text_4: list = ["${{word}}", "None"]
-        text_5: list = ["${{dict.dict1.value}}", "None"]
+        text_1: list = ["var bool = ${{bool}} and name = ${{str}}", "var bool = True and name = Jame"]
+        text_2: list = ["${{Dict.value}}", "Dict in Dict"]
+        text_3: list = ["${{MasterDict.SecondDict.value}}", "Dict in Dict in Dict"]
+        text_4: list = ["${{word}}", "[key 'word' not exist]"]
+        text_5: list = ["${{dict.dict1.value}}", "[key 'dict.dict1.value' not exist]"]
 
         parser = TemplateStr(variableDict=varDict)
 
@@ -73,10 +73,10 @@ class TestParseMethode(unittest.TestCase):
         self.assertEqual(parser.parseVariable(text_4[0]), text_4[1], "text_4")
         self.assertEqual(parser.parseVariable(text_5[0]), text_5[1], "text_5")
     
-    def testFunction(self):
+    def testInternFunction(self):
 
         uppercase: list = ["@{{uppercase lower}}", "AZERTY"]
-        uppercase2: list = ["@{{uppercase dict.value}}", "DICT IN DICT"]
+        uppercase2: list = ["@{{uppercase Dict.value}}", "DICT IN DICT"]
         uppercaseFirst: list = ["@{{uppercaseFirst lower}}", "Azerty"]
         lowercase: list = ["@{{lowercase upper}}", "azerty"]
         # casefold: list = ["@{{casefold cfold}}", "grüssen"]
@@ -464,8 +464,8 @@ class TestParseMethode(unittest.TestCase):
         self.assertEqual(parser.parseCondition(bool_Inferior_2_Bool[0]), bool_Inferior_2_Bool[1], "bool_Superior_2_Bool")
 
     def testSwitch(self):
-        text_Switch_1: list = ["?{{name; Jame=#0, Tony=#1, Marco=#2, default=#default}}", "#0"]
-        text_Switch_2: list = ["?{{age:int; 56=#0, 36=#1, 32=#2, default=#default}}", "#2"]
+        text_Switch_1: list = ["?{{str; Jame=#0, Tony=#1, Marco=#2, default=#default}}", "#0"]
+        text_Switch_2: list = ["?{{int:int; 56=#0, 36=#1, 32=#2, default=#default}}", "#2"]
         text_Switch_3: list = ["?{{lower:str; azertY=#0, Azerty=#1, AzErTy=#2, default=#default}}", "#default"]
 
         parser = TemplateStr(variableDict=varDict)
@@ -530,7 +530,7 @@ if __name__ == '__main__':
     test_order = [
         "testAll",
         "testVariable", 
-        "testFunction",
+        "testInternFunction",
         "testCustomFunction",
         "testConditionEqual",
         "testConditionNoTEqual",

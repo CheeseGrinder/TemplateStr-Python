@@ -117,7 +117,7 @@ class TemplateStr:
                 fvalue = temp
             else:
                 fvalue = self.__variables[key]
-        except KeyError:
+        except (KeyError, TypeError):
             ok = False
             fvalue = f"[key '{key}' not exist]"
 
@@ -129,7 +129,7 @@ class TemplateStr:
 
         return -> str
         '''
-        while self.hasAll(text):
+        while self.hasOne(text):
             # parse Variable
             text = self.parseVariable(text)
 
@@ -182,10 +182,12 @@ class TemplateStr:
                 match: str = group['match']
                 key: str = group['key']
 
+                value: str = "none"
 
+                v: Tuple = self.__getVariable(key)
 
-                if key != None and self.__getVariable(key)[1]:
-                    value: str = self.__getVariable(key)[0]
+                if key != None and v[1]:
+                    value = v[0]
 
                 functionName: str = group['function']
 
@@ -215,9 +217,9 @@ class TemplateStr:
                             if resultTextfunc != None:
                                 text = text.replace(m.groupdict()['match'], resultTextfunc)
                             else:
-                                sys.exit('The '+ functionName + ' function must return a string')
+                                sys.exit(f'[Function {functionName} must return a string]')
                 else:
-                    sys.exit('The ' + functionName + ' function does not exist')
+                    sys.exit(f'[Function {functionName} not exist]')
             
         return text
 
@@ -259,7 +261,7 @@ class TemplateStr:
                     elif compSymbol == ">":
                         text = text.replace(match, resultValue1 if value1 > value2 else resultValue2)
                     else:
-                        sys.exit('The ' + compSymbol + ' is not a valid comparator')
+                        sys.exit(f'[{compSymbol} is not valid comparator]')
 
         return text
 
@@ -313,7 +315,12 @@ class TemplateStr:
 
         return text
 
-    def hasAll(self, text: str) -> bool:
+    def hasOne(self, text: str) -> bool:
+        '''
+        Detects if there is the presence of min one syntaxe
+
+        return -> bool
+        '''
 
         if self.hasVariable(text) or self.hasFunction(text) or self.hasCondition(text) or self.hasSwitch(text):
             return True

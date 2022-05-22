@@ -1,0 +1,4 @@
+Varaible : @{{VariableName}}
+Function : 
+    text : @{{test}} @{{test test2}} @{{test param, b/test}}
+    Reg : (?P<match>@{{(?P<function>[^{@}\s]+) ?(?P<parameter>[^{@(), }]+|(?:[^{@()}](?! $))*(?=, )[^{@()}]*)?(?<!,| )}}) || (?P<match>@{{(?P<function>[^{@}\s]+) ?(?P<parameter>[^{@}]+(?<!\w)(?<!,| )|[^{@}]+(?<!,| ))?}})

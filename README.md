@@ -1,10 +1,7 @@
-# TemplateStr-Python
-
-### TemplateStr allows to add variable, function and condition in a string.
-
 <div align="center">
-    <img src="https://img.shields.io/badge/Python-v3.8%5E-green?style=flat-square&logo=python&logoColor=ffd13e&labelColor=3470a2&color=5c5c5c"/>
-    <img src="https://img.shields.io/github/downloads/CheeseGrinder/TemplateStr-Python/total?label=Download&style=flat-square"/>
+    <h1>TemplateStr-Python</h1>
+    <h3>TemplateStr allows to add variable, function, condition and switch in a string.</h3>
+    <img src="https://img.shields.io/badge/Python-v3.6%5E-green?style=flat-square&logo=python&logoColor=ffd13e&color=3470a2"/>
     <a href="https://github.com/CheeseGrinder/TemplateStr-Python/actions/workflows/python-app.yml">
         <img src="https://img.shields.io/github/workflow/status/CheeseGrinder/TemplateStr-Python/Python test?label=Test&style=flat-square"/>
     </a>
@@ -23,7 +20,7 @@ parser = TemplateStr(functionList: list, variableDict: dict)
 ```
 
 - `functionList` : is a list of Functions you want to pass to be called in your text
-- `varaibleDict` : is a dictionary of the Variables you want to pass to be called in your text
+- `variableDict` : is a dictionary of the Variables you want to pass to be called in your text
 
 <strong>Function : </strong>
 
@@ -40,6 +37,7 @@ parser.parse(text)
 - `hasFunction(text: str) -> bool` : check if there are any Function
 - `hasCondition(text: str) -> bool` : check if there are any Condition
 - `hasSwitch(text: str) -> bool` : check if there are any Switch
+- `hasOne(text: str) -> bool` : check if there are one syntaxe
 
 #### Exemple Syntaxe
 
@@ -55,8 +53,6 @@ The syntax of the Variables is like if :
 if the value does not exist then `None` is return
 
 ```python
-from PyTempStr import TemplateStr
-
 varDict = {
     'variable':'yes'
 }
@@ -69,8 +65,6 @@ print(parser.parse(text))
 ```
 
 ```python
-from PyTempStr import TemplateStr
-
 varDict = {
     'variable': {
         'value': 'yes'
@@ -115,8 +109,6 @@ list of basic functions :
 - `@{{dateTime}}`
 
 ```python
-from PyTempStr import TemplateStr
-
 varDict = {'variable':'no'}
 
 text = 'is lower case : @{{uppercase variable}}'
@@ -152,8 +144,6 @@ parameters to be passed in a list
 the custom function must necessarily return a str
 
 ```python
-from PyTempStr import TemplateStr
-
 def customFunc(list: list) -> str:
     return list[0].replace('no', 'maybe')
 
@@ -196,8 +186,6 @@ comparator:
 `Typing` can be used at `var1` and `var2` level
 
 ```python
-from PyTempStr import TemplateStr
-
 varDict = {'var1':'no', 'var2':'o2'}
 
 text = 'are you a variable : #{{"test" == var2: yes || no}}'
@@ -241,8 +229,6 @@ type accept :
 - `float`
 
 ```python
-from PyTempStr import TemplateStr
-
 varDict = {
     'variable':'yes'
 }
@@ -255,8 +241,6 @@ print(parser.parse(text))
 ```
 
 ```python
-from PyTempStr import TemplateStr
-
 varDict = {
     'variable': 42
 }

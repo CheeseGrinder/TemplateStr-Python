@@ -8,11 +8,11 @@ class TemplateStr:
 
     __functions: list
     __variables: dict
-    __regVariable: Pattern = regex.compile(r'(?P<match>\${{(?P<key>[^{$}]+)}})')
-    __regFunction: Pattern = regex.compile(r'(?P<match>@{{(?P<function>[^{@}\s]+) ?(?P<key>[^{@}]+)?}})')
-    __regCondition: Pattern = regex.compile(r'(?P<match>#{{(?P<compValue1>[^{#}]+) (?P<compSymbol>[=!<>][=]?) (?P<compValue2>[^{#}]+): (?P<resultValue1>[^{}]+) \|\| (?P<resultValue2>[^{}]+)}})')
-    __regSwitch: Pattern = regex.compile(r'(?P<match>\?{{(?:(?P<key>[^{?}:]+)|(?P<keyTyped>[^{?}]+):(?P<type>str|int|float)); (?P<val>(?:[^{}]+)=(?:[^{}]+)), default=(?P<default>[^{}]+)}})')
-    __regTyping: Pattern = regex.compile(r'\"(?P<str_double>[^\"]+)\"|\'(?P<str_single>[^\']+)\'|`(?P<str_back>[^`]+)`|<b:(?P<bool>True|False)>|<n:(?P<number>[0-9_.]+)>|(?P<variable>[^<>\" ]+)')
+    __regVariable: Pattern = regex.compile(r'(?P<match>\${{(?P<key>[\w._-]+)}})')
+    __regFunction: Pattern = regex.compile(r'(?P<match>@{{(?P<functionName>[^{@}\s]+)(?:; (?P<parameters>[^{@}]+))?}})')
+    __regCondition: Pattern = regex.compile(r'(?P<match>#{{(?P<conditionValue1>[^{#}]+) (?P<conditionSymbol>==|!=|<=|<|>=|>) (?P<conditionValue2>[^{#}]+); (?P<trueValue>[^{}]+) \| (?P<falseValue>[^{}]+)}})')
+    __regSwitch: Pattern = regex.compile(r'(?P<match>\?{{(?:(?P<key>[^{?}/]+)|(?P<type>str|int|float)/(?P<tKey>[^{?}]+)); (?P<values>(?:[^{}]+):(?:[^{}]+)), _:(?P<defaultValue>[^{}]+)}})')
+    __regTyping: Pattern = regex.compile(r'\"(?P<str_double>[^\"]+)\"|\'(?P<str_single>[^\']+)\'|`(?P<str_back>[^`]+)`|b/(?P<bool>[Tt]rue|[Ff]alse)|i/(?P<int>[0-9_]+)|f/(?P<float>[0-9_.]+)|(?P<variable>[^<>\" ]+)')
 
     def __init__(self, functionList: list = [], variableDict: dict = {}):
         '''
@@ -75,12 +75,12 @@ class TemplateStr:
                 elif groupParam['bool'] != None:
                     typeBool: bool = bool(strtobool(groupParam['bool']))
                     list_temp.append(typeBool)
-                elif groupParam['number'] != None:
-                    if '.' in groupParam['number']:
-                        number: float = float(groupParam['number'])
-                    else:
-                        number: int = int(groupParam['number'])
-                    list_temp.append(number)
+                elif groupParam['int'] != None:
+                    numberInt: int = int(groupParam['int'])
+                    list_temp.append(numberInt)
+                elif groupParam['float'] != None:
+                    numberfloat: float = float(groupParam['float'])
+                    list_temp.append(numberfloat)
                 elif groupParam['variable'] != None:
                     list_temp.append(str(self.__getVariable(groupParam['variable'])[0]))
 
@@ -180,16 +180,16 @@ class TemplateStr:
                 group: dict = m.groupdict()
 
                 match: str = group['match']
-                key: str = group['key']
+                parameters: str = group['parameters']
 
                 value: str = "none"
 
-                v: Tuple = self.__getVariable(key)
+                v: Tuple = self.__getVariable(parameters)
 
-                if key != None and v[1]:
+                if parameters != None and v[1]:
                     value = v[0]
 
-                functionName: str = group['function']
+                functionName: str = group['functionName']
 
                 if functionName == 'uppercase': text = text.replace(match, value.upper())
                 elif functionName == 'uppercaseFirst': text = text.replace(match, value.capitalize())
@@ -204,9 +204,9 @@ class TemplateStr:
                         
                         if regex.search(r'(?<!\S){}(?!\S)'.format(functionName), str(func)) != None:
 
-                            if key != None:
+                            if parameters != None:
 
-                                listParametre: list = self.__typing(key)
+                                listParametre: list = self.__typing(parameters)
 
                                 method = {func:func}
                                 resultTextfunc = method[func](listParametre)
@@ -225,7 +225,7 @@ class TemplateStr:
 
     def parseCondition(self, text: str) -> str:
         '''
-        parse all the `{{#var1 == var2: value1 || value2}}` in the text give in
+        parse all the `{{#var1 == var2; value1 | value2}}` in the text give in
 
         return -> str
         '''
@@ -238,30 +238,30 @@ class TemplateStr:
                 group: dict = m.groupdict()
 
                 match = group['match']
-                compValue1 = group['compValue1']
-                compValue2 = group['compValue2']
-                compSymbol = group['compSymbol']
-                resultValue1 = group['resultValue1']
-                resultValue2 = group['resultValue2']
+                conditionValue1 = group['conditionValue1']
+                conditionValue2 = group['conditionValue2']
+                conditionSymbol = group['conditionSymbol']
+                trueValue = group['trueValue']
+                falseValue = group['falseValue']
 
-                listTyping = self.__typing(compValue1 + " " + compValue2)
+                listTyping = self.__typing(conditionValue1 + " " + conditionValue2)
 
-                if compSymbol == "==":
-                    text = text.replace(match, resultValue1 if listTyping[0] == listTyping[1] else resultValue2)
-                elif compSymbol == "!=":
-                    text = text.replace(match, resultValue1 if listTyping[0] != listTyping[1] else resultValue2)
+                if conditionSymbol == "==":
+                    text = text.replace(match, trueValue if listTyping[0] == listTyping[1] else falseValue)
+                elif conditionSymbol == "!=":
+                    text = text.replace(match, trueValue if listTyping[0] != listTyping[1] else falseValue)
                 else:
                     value1, value2 = self.__convertAnyToFloat(listTyping[0], listTyping[1])
-                    if compSymbol == "<=":
-                        text = text.replace(match, resultValue1 if value1 <= value2 else resultValue2)
-                    elif compSymbol == ">=":
-                        text = text.replace(match, resultValue1 if value1 >= value2 else resultValue2)
-                    elif compSymbol == "<":
-                        text = text.replace(match, resultValue1 if value1 < value2 else resultValue2)
-                    elif compSymbol == ">":
-                        text = text.replace(match, resultValue1 if value1 > value2 else resultValue2)
+                    if conditionSymbol == "<=":
+                        text = text.replace(match, trueValue if value1 <= value2 else falseValue)
+                    elif conditionSymbol == ">=":
+                        text = text.replace(match, trueValue if value1 >= value2 else falseValue)
+                    elif conditionSymbol == "<":
+                        text = text.replace(match, trueValue if value1 < value2 else falseValue)
+                    elif conditionSymbol == ">":
+                        text = text.replace(match, trueValue if value1 > value2 else falseValue)
                     else:
-                        sys.exit(f'[{compSymbol} is not valid comparator]')
+                        sys.exit(f'[{conditionSymbol} is not valid comparator]')
 
         return text
 
@@ -283,8 +283,8 @@ class TemplateStr:
 
                 dictTemp = {}
 
-                for n in group["val"].split(", "):
-                    key, value = n.split("=")
+                for n in group["values"].split(", "):
+                    key, value = n.split(":")
                     dictTemp[key] = value
 
 
@@ -297,10 +297,10 @@ class TemplateStr:
                             result = dictTemp[key]
                             break
                         else:
-                            result = group['default']
+                            result = group['defaultValue']
 
-                elif group['keyTyped'] != None:
-                    keyVar = group['keyTyped']
+                elif group['tKey'] != None:
+                    keyVar = group['tKey']
                     typeVar = group['type']
 
                     for key in dictTemp.keys():
@@ -309,7 +309,7 @@ class TemplateStr:
                             result = dictTemp[key]
                             break
                         else:
-                            result = group['default']
+                            result = group['defaultValue']
 
                 text = text.replace(match, result)
 

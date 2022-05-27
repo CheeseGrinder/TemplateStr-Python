@@ -7,293 +7,223 @@
     </a>
 </div>
 
-<strong>Import : </strong>
+### Install :
 
-```python
-from PyTempStr import TemplateStr
+```
+pip install https://github.com/CheeseGrinder/TemplateStr-Python/archive/vX.X.X.tar.gz
 ```
 
-<strong>Construtor : </strong>
+### Import :
+
+```python
+from templateStr import TemplateStr
+```
+
+### Construtor :
 
 ```python
 parser = TemplateStr(functionList: list, variableDict: dict)
 ```
 
-- `functionList` : is a list of Functions you want to pass to be called in your text
-- `variableDict` : is a dictionary of the Variables you want to pass to be called in your text
+<ul>
+<li>
+<details>
+<summary><code>functionList</code>: is a list of Functions you want to pass to be called in your text</summary><br>
 
-<strong>Function : </strong>
+```python
+funcs: list = [meCustomFunc, otherCustomFunc]
+```
+
+</details>
+</li>
+<li>
+<details>
+<summary><code>variableDict</code>: is a dictionary of the Variables you want to pass to be called in your text</summary><br>
+
+```python
+varDict: dict = {
+    "Build": "Succes",
+    "var": "int",
+    "str": "Jame",
+    "int": 32,
+    "float": 4.2,
+    "bool": True,
+    "lower": "azerty",
+    "upper": "AZERTY",
+    "swap": "AzErTy",
+    "Dict": {"value": "Dict in Dict"},
+    "MasterDict": {"SecondDict": {"value": "Dict in Dict in Dict"}},
+}
+```
+
+</details>
+</li>
+</ul>
+
+### Function :
 
 ```python
 parser.parse(text)
 ```
 
 - `parse(text: str) -> str` : parse all (variable, function, condition and switch)
-- `parseVariable(text: str) -> str` : parse Variable ; ${{variable}}
-- `parseFunction(text: str) -> str` : parse Function ; @{{function}}
-- `parseCondition(text: str) -> str` : parse Condition ; #{{var1 == var2: value1 || value2}}
-- `parseSwitch(text: str) -> str` : parse Switch ; ?{{var; value1=#0F0, 56=#00F, ..., default=#000}}
+- `parseVariable(text: str) -> str` : parse Variable ; ${{variableName}}
+- `parseFunction(text: str) -> str` : parse Function and Custom Function ; @{{functionName}}
+- `parseCondition(text: str) -> str` : parse Condition ; #{{value1 == value2; trueValue | falseValue}}
+- `parseSwitch(text: str) -> str` : parse Switch ; ?{{var; value1:#0F0, value2:#00F, ..., _:#000}}
+- `hasOne(text: str) -> bool` : check if there are one syntaxe
 - `hasVariable(text: str) -> bool` : check if there are any Variable
 - `hasFunction(text: str) -> bool` : check if there are any Function
 - `hasCondition(text: str) -> bool` : check if there are any Condition
 - `hasSwitch(text: str) -> bool` : check if there are any Switch
-- `hasOne(text: str) -> bool` : check if there are one syntaxe
 
-#### Exemple Syntaxe
+### Exemple Syntaxe :
 
+<ul>
+<li>
 <details>
 <summary><strong>Variable</strong></summary>
 </br>
 
-The syntax of the Variables is like if : 
-- `${{variable}}` 
-- `${{dict.variable}}`
-- `${{dictM.dict1.variable. ...}}`
+The syntax of the Variables is like if :
+- `${{variable}}`
+- `${{Map.value}}`
+- `${{MasterMap.SecondMap.value. ...}}`
 
 if the value does not exist then `None` is return
 
-```python
-varDict = {
-    'variable':'yes'
-}
+<!-- V Be careful, it's not a "go" code, it's just to have some colour in the rendering -->
+```go
+name = "Jame"
 
-text = 'are you a variable : ${{variable}}'
-
-parser = TemplateStr(variableDict=varDict)
-
-print(parser.parse(text))
-```
-
-```python
-varDict = {
-    'variable': {
-        'value': 'yes'
-    }
-}
-
-text = 'are you a variable : ${{variable.value}}'
-
-parser = TemplateStr(variableDict=varDict)
-
-print(parser.parse(text))
-```
-
-```python
-variable = 'yes'
-
-print('are you a variable : ' + variable)
-```
-
-The three codes will return
-
-```text
-are you a variable : yes
+"name is ${{name}}" => parse => "name is Jame"
 ```
 
 </details>
-
+</li>
+<li>
 <details>
 <summary><strong>Function</strong></summary>
 </br>
 
-The syntax of the Function is like if : `@{{function variable}}`
+The syntax of the Function is like if : `@{{function; parameter}}` or `@{{function}}`
 
-list of basic functions : 
-- `@{{uppercase variable}}`
-- `@{{uppercaseFirst variable}}`
-- `@{{lowercase variable}}`
-<!-- - `@{{casefold variable}}` -->
-- `@{{swapcase variable}}`
+internal function list :
+
+- `@{{uppercase; variableName}}`
+- `@{{uppercaseFirst; variableName}}`
+- `@{{lowercase; variableName}}`
+- `@{{swapcase; variableName}}`
 - `@{{time}}`
 - `@{{date}}`
 - `@{{dateTime}}`
 
-```python
-varDict = {'variable':'no'}
+<!-- V Be careful, it's not a "go" code, it's just to have some colour in the rendering -->
+```go
+name = "jame"
 
-text = 'is lower case : @{{uppercase variable}}'
-
-parser = TemplateStr(variableDict=varDict)
-
-print(parser.parse(text))
+"name is @{{uppercase; name}}" => parse => "name is JAME"
 ```
 
-```python
-variable = 'no'
-
-print('is lower case : ' + variable.upper())
-```
-
-The two codes will return
-
-```text
-is lower case : NO
-```
 </details>
+</li>
 
+<li>
 <details>
 <summary><strong>Custom Function</strong></summary>
 </br>
 
-The syntax of the Custom Function is like if : `@{{customFunction param1 param2 ...}}`
+The syntax of the Custom Function is like if : `@{{customFunction; param1 param2 ...}}` or `@{{customFunction}}`
 
-`Typing` can be used at the parameter level of custom functions
+`Syntaxe Typing` can be used at the parameter level of custom functions
 
-parameters to be passed in a list
-
-the custom function must necessarily return a str
-
-```python
-def customFunc(list: list) -> str:
-    return list[0].replace('no', 'maybe')
-
-text = 'are you a customFunction : @{{customFunc "no"}}'
-
-parser = TemplateStr(functionList=[customFunc])
-
-print(parser.parse(text))
-```
-The codes will return
-
-```text
-are you a customFunction : maybe
-```
+For developers :
+- Parameters to be passed in a `list/vec/array`
+- The custom function must necessarily return a `str/string`
 
 </details>
+</li>
 
+<li>
 <details>
 <summary><strong>Condition</strong></summary>
 </br>
 
-The syntax of the Condition is like if : 
-- `#{{var1 == var2: value1 || value2}}`
+The syntax of the Condition is like if :
+- `#{{value1 == value2; trueValue | falseValue}}`
 
 comparator:
 - `==`
 - `!=`
-- `<=`*
-- `<`*
-- `>=`*
-- `>`*
+- `<=` *
+- `<` *
+- `>=` *
+- `>` *
 
-*for this comparator the type `string` and `bool` are modified :
+<details>
+<summary>* for this comparator the type <code>string</code> and <code>bool</code> are modified :</summary>
+
 - `string` it's the number of characters that is compared ('text' = 4)
 - `bool` it's the value in int that is compared (True = 1)
 
+</details></br>
 
-`var1` is compared with `var2`
+`value1` is compared with `value2`
 
-`Typing` can be used at `var1` and `var2` level
+`Syntaxe Typing` can be used at `value1` and `value2` level
 
-```python
-varDict = {'var1':'no', 'var2':'o2'}
+<!-- V Be careful, it's not a "go" code, it's just to have some colour in the rendering -->
+```go
+name = "Jame"
 
-text = 'are you a variable : #{{"test" == var2: yes || no}}'
-
-parser = TemplateStr(variableDict=varDict)
-
-print(parser.parse(text))
-```
-```python
-var1 = 'no'
-var2 = 'o2'
-
-if "test" == var2:
-    text = 'yes'
-else:
-    text = 'no'
-print('are you a variable : ' + text)
-```
-
-The 2 codes will return
-
-```text
-are you a variable : no
+"Jame is equal to James ? #{{name == 'James'; Yes | No}}" => parse => "Jame is equal to James ? No"
 ```
 
 </details>
+</li>
 
+<li>
 <details>
 <summary><strong>Switch</strong></summary>
 </br>
 
 The syntax of the Switch is like if : 
-- `?{{var; value1=#0F0, 56=#00F, ..., default=#000}}`
-- `?{{var:type; 16=#0F0, 56=#00F, ..., default=#000}}`
+- `?{{variableName; value1:#0F0, value2:#00F, ..., _:#000}}`
+- `?{{type/variableName; value1:#0F0, value2:#00F, ..., _:#000}}`
 
-`var` can be typed, if it is typed then all the `values` will be typed of the same type
+The value of `variableName` is compared with all the `values*`,
+if a `values*` is equal to the value of `variableName` then the value after the ":" will be returned
 
-type accept :
+you can specify the type of `variableName`, but don't use `Syntaxe Typing`.
+If the type is specified then all `values*` will be typed with the same type.
+
+syntaxe for specify type `variableName` :
 - `str`
 - `int`
 - `float`
 
-```python
-varDict = {
-    'variable':'yes'
-}
+<!-- V Be careful, it's not a "go" code, it's just to have some colour in the rendering -->
+```go
+name = "Jame"
+yearsOld = 36
 
-text = '=( ?{{variable; yes=#A, no=#B, maybe=#C, default=#000}} )='
-
-parser = TemplateStr(variableDict=varDict)
-
-print(parser.parse(text))
-```
-
-```python
-varDict = {
-    'variable': 42
-}
-
-text = '=( ?{{variable:int; 42=#A, 32=#B, 22=#C, default=#000}} )='
-
-parser = TemplateStr(variableDict=varDict)
-
-print(parser.parse(text))
-```
-
-```python
-variable = 'yes'
-
-if variable == "yes":
-    result = "#A"
-elif variable == "no":
-    result = "#B"
-elif variable == "maybe":
-    result = "#C"
-else
-    result = "#000"
-
-print('=( ' + result + ' )=')
-```
-
-The 3 codes will return
-
-```text
-=( #A )=
+"how old is Jame ? ?{{name; Jame:42 years old, William:36 years old, _:I don't know}}" => parse => "how old is Jame ? 42 years old"
+"who at 36 years old ? ?{{int/yearsOld; 42:Jame !, 36:William !, _:I don't know}}" => parse => "who at 42 years old ? William !"
 ```
 
 </details>
+</li>
+</ul>
 
-<details>
-<summary><strong>Typing</strong></summary>
-</br>
+### Syntaxe Typing :
 
-| format                       | type    | description                                                       | return                 |
-|------------------------------|---------|-------------------------------------------------------------------|------------------------|
-| keyVariable                  | `*`     | is the key of the value in the dictionary pass to the constructor | value of `keyVariable` |
-| \<b:True>                    | `bool`  |                                                                   | True                   |
-| \<n:123>                     | `int`   |                                                                   | 123                    |
-| \<n:123.4>                   | `float` |                                                                   | 123.4                  |
-| "text" or 'text' or \`text\` | `str`   |                                                                   | text                   |
-
-</details>
-
-
-### Install
-
-- Download : [latest](https://github.com/CheeseGrinder/TemplateStr-Python/releases/latest)
-- `pip install *.whl`
+| Format                       | Type    | Description                                                             | Return                 |
+|------------------------------|---------|-------------------------------------------------------------------------|------------------------|
+| variableName                 | `*`     | Is the key of the value in the dictionary pass to the constructor       | value of `variableName`|
+| b/True                       | `bool`  | Type the string True as `bool`                                          | True                   |
+| i/123                        | `int`   | Type the string 123 as type `int`                                       | 123                    |
+| f/123.4                      | `float` | Type the string 123.4 as type `float`                                   | 123.4                  |
+| "text" or 'text' or \`text\` | `str`   | It just takes what's in quote, not to be interpreted as a variable name | text                   |
 
 ### TODO
 

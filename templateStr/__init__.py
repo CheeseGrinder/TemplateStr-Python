@@ -4,28 +4,24 @@ from typing import Any, Pattern, Tuple
 from distutils.util import strtobool
 from time import strftime, localtime
 
+from templateStr.reg import *
+
 class TemplateStr:
 
     __functions: list
     __variables: dict
-    __regVariable: Pattern = regex.compile(r'(?P<match>\${{(?P<key>[\w._-]+)}})')
-    __regFunction: Pattern = regex.compile(r'(?P<match>@{{(?P<functionName>[^{@}\s]+)(?:; (?P<parameters>[^{@}]+))?}})')
-    __regCondition: Pattern = regex.compile(r'(?P<match>#{{(?P<conditionValue1>[^{#}]+) (?P<conditionSymbol>==|!=|<=|<|>=|>) (?P<conditionValue2>[^{#}]+); (?P<trueValue>[^{}]+) \| (?P<falseValue>[^{}]+)}})')
-    __regSwitch: Pattern = regex.compile(r'(?P<match>\?{{(?:(?P<key>[^{?}/]+)|(?P<type>str|int|float)/(?P<tKey>[^{?}]+)); (?P<values>(?:[^{}]+):(?:[^{}]+)), _:(?P<defaultValue>[^{}]+)}})')
-    __regTyping: Pattern = regex.compile(r'\"(?P<str_double>[^\"]+)\"|\'(?P<str_single>[^\']+)\'|`(?P<str_back>[^`]+)`|b/(?P<bool>[Tt]rue|[Ff]alse)|i/(?P<int>[0-9_]+)|f/(?P<float>[0-9_.]+)|(?P<variable>[^<>\" ]+)')
+    __regVariable: Pattern = regex.compile(REG_VARIABLE)
+    __regFunction: Pattern = regex.compile(REG_FUNCTION)
+    __regCondition: Pattern = regex.compile(REG_CONDITION)
+    __regSwitch: Pattern = regex.compile(REG_SWITCH)
+    __regTyping: Pattern = regex.compile(rf'{REG_STR}|{REG_BOOL}|{REG_INT}|{REG_FLOAT}|{REG_VAR}|{REG_LIST}')
 
     def __init__(self, functionList: list = [], variableDict: dict = {}):
         '''
-        `functionList: list` is a list of custom functions that can be used when you call a function with: `{{@myCustomFunction}}`
+        `functionList: list`
 
-        `variableDict: dict` is a dictionary of the values you want to use when you call: `{{$myVar}}`
+        `variableDict: dict`
 
-        Typing:
-            keyVariable  : is the key of the value in the dictionary pass to the constructor (return the value)
-            <b:True>     : bool  (return True)
-            <n:123>      : int   (return 123)
-            <n:123.4>    : float (return 123.4)
-            "text"       : str   (return text)
         '''
 
         self.__functions = functionList
@@ -81,8 +77,8 @@ class TemplateStr:
                 elif groupParam['float'] != None:
                     numberfloat: float = float(groupParam['float'])
                     list_temp.append(numberfloat)
-                elif groupParam['variable'] != None:
-                    list_temp.append(str(self.__getVariable(groupParam['variable'])[0]))
+                elif groupParam['varName'] != None:
+                    list_temp.append(str(self.__getVariable(groupParam['varName'])[0]))
 
         elif typing == "int":
             number: int = int(string)
@@ -102,24 +98,32 @@ class TemplateStr:
 
         return list_temp
 
-    def __getVariable(self, key: str) -> Tuple[Any, bool]:
+    def __getVariable(self, key: str, index: int = None) -> Tuple[Any, bool]:
 
         ok: bool = True
 
         try:
             if '.' in key and not key.isspace():
                 keyList = key.split('.')
-                for index, value in enumerate(keyList):
-                    if index == 0:
+                for i, value in enumerate(keyList):
+                    if i == 0:
                         temp = self.__variables[value]
                     else:
                         temp = temp[value]
                 fvalue = temp
             else:
                 fvalue = self.__variables[key]
+
         except (KeyError, TypeError):
             ok = False
             fvalue = f"[key '{key}' not exist]"
+            return (fvalue, ok)
+
+        if index is not None and isinstance(fvalue, list):
+            fvalue = fvalue[index]
+        elif index is not None:
+            ok = False
+            fvalue = f"[key '{key}' is not list]"
 
         return (fvalue, ok)
 
@@ -146,7 +150,7 @@ class TemplateStr:
 
     def parseVariable(self, text: str) -> str:
         '''
-        parse all the `{{$variable}}` in the text give in
+        parse all the `${variable}` or `${variable[1]}` in the text give in
 
         return -> str
         '''
@@ -159,9 +163,14 @@ class TemplateStr:
                 group: dict = m.groupdict()
 
                 match: str = group['match']
-                key: str = group['key']
+                key: str = group['varName']
+                var: Any
+                if group['index'] == None:
+                    var = self.__getVariable(key)[0]
+                else:
+                    var = self.__getVariable(key, int(group['index']))[0]
 
-                text = text.replace(match, str(self.__getVariable(key)[0]))
+                text = text.replace(match, str(var))
 
         return text
 
@@ -284,12 +293,12 @@ class TemplateStr:
                 dictTemp = {}
 
                 for n in group["values"].split(", "):
-                    key, value = n.split(":")
+                    key, value = n.split("::")
                     dictTemp[key] = value
 
 
-                if group['key'] != None:
-                    keyVar = group['key']
+                if group['varName'] != None:
+                    keyVar = group['varName']
 
                     for key in dictTemp.keys():
                         
@@ -299,8 +308,7 @@ class TemplateStr:
                         else:
                             result = group['defaultValue']
 
-                elif group['tKey'] != None:
-                    keyVar = group['tKey']
+                elif group['type'] != None:
                     typeVar = group['type']
 
                     for key in dictTemp.keys():

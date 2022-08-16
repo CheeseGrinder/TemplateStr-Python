@@ -5,17 +5,102 @@ from time import strftime, localtime
 def test() -> str:
     return "Test1"
 
-def testType(list:list) -> str:
+def testType(array:list) -> str:
 
     result = "ok"
+
+    # print(array)
+
+    a = array[0]
+    b = array[1]
+    c = array[2]
+    d = array[3]
+    e = array[4]
+    f = array[5]
+    g = array[6]
+    h = array[7]
+    i = array[8]
+    j = array[9]
     
-    if type(list[0]) != str: result = "type list[0] != str"
-    if type(list[1]) != str: result = "type list[1] != str"
-    if type(list[2]) != str: result = "type list[2] != str"
-    if type(list[3]) != bool: result = "type list[3] != bool"
-    if type(list[4]) != int: result = "type list[4] != int"
-    if type(list[5]) != float: result = "type list[5] != float"
-    if type(list[6]) != str: result = "type list[6] != str"
+    # test a
+
+    if type(a) != str: 
+        result = "type a != str"
+    else:
+        if a != "text":
+            result = "a != text"
+
+    #  test b
+
+    if type(b) != str: 
+        result = "type b != str"
+    else:
+        if b != "text":
+            result = "b != text"
+
+    #  test c
+
+    if type(c) != str: 
+        result = "type c != str"
+    else:
+        if c != "text":
+            result = "c != text"
+
+    #  test d
+
+    if type(d) != bool: 
+        result = "type d != bool"
+    else:
+        if d != True:
+            result = "d != True"
+
+    #  test e
+
+    if type(e) != int: 
+        result = "type e != int"
+    else:
+        if e != 123:
+            result = "e != 123"
+
+    # test f
+
+    if type(f) != float:
+        result = "type f != float"
+    else:
+        if f != 123.4:
+            result = "f != 123.4"
+
+    # test g
+
+    if type(g) != int:
+        result = "type g != int"
+    else:
+        if g != 32:
+            result = "g != 32"
+
+    # test h
+
+    if type(h) != int:
+        result = "type h != int"
+    else:
+        if h != 42:
+            result = "h != 42"
+
+    # test i
+
+    if type(i) != list:
+        result = "type i != list"
+    else:
+        if i[1] != 56:
+            result = "i != '56'"
+
+    # test j
+
+    if type(j) != str:
+        result = "type j != str"
+    else:
+        if j != "Dict in Dict":
+            result = "j != 'Dict in Dict'"
 
     return result
 
@@ -106,7 +191,7 @@ class TestParseMethode(unittest.TestCase):
     def testCustomFunction(self):
         
         text_1: list = ["@{test}", "Test1"]
-        testType: list = ["@{testType; \"text\" 'text' `text` b/True i/123 f/123.4 age}", "ok"]
+        testType: list = ["@{testType; \"text\" 'text' `text` b/True i/123 f/123.4 int list[1] ('test', i/56) Dict.value}", "ok"]
 
         parser = TemplateStr(funcs, varDict)
 

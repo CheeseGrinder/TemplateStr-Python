@@ -77,8 +77,17 @@ class TemplateStr:
                 elif groupParam['float'] != None:
                     numberfloat: float = float(groupParam['float'])
                     list_temp.append(numberfloat)
-                elif groupParam['varName'] != None:
-                    list_temp.append(str(self.__getVariable(groupParam['varName'])[0]))
+                elif groupParam['variable'] != None:
+                    if groupParam['index'] == None:
+                        list_temp.append(self.__getVariable(groupParam['variable'])[0])
+                    else:
+                        list_temp.append(self.__getVariable(groupParam['variable'], int(groupParam['index']))[0])
+
+                elif groupParam['list'] != None:
+                    l = groupParam['list'].split(", ")
+                    for i, v in enumerate(l):
+                        l[i] = self.__typing(v)[0]
+                    list_temp.append(l)
 
         elif typing == "int":
             number: int = int(string)
@@ -164,7 +173,7 @@ class TemplateStr:
                 group: dict = m.groupdict()
 
                 match: str = group['match']
-                key: str = group['varName']
+                key: str = group['variable']
                 var: Any
                 if group['index'] == None:
                     var = self.__getVariable(key)[0]
@@ -298,8 +307,8 @@ class TemplateStr:
                     dictTemp[key] = value
 
 
-                if group['varName'] != None:
-                    keyVar = group['varName']
+                if group['variable'] != None:
+                    keyVar = group['variable']
 
                     for key in dictTemp.keys():
                         

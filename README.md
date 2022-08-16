@@ -219,13 +219,14 @@ yearsOld = 36
 
 ### Syntaxe Typing :
 
-| Format                       | Type    | Description                                                             | Return                 |
+| Format                       | Type    | Note                                                                    | Return                 |
 |------------------------------|---------|-------------------------------------------------------------------------|------------------------|
 | variableName                 | `*`     | Is the key of the value in the dictionary pass to the constructor       | value of `variableName`|
 | b/True                       | `bool`  | Type the string True as `bool`                                          | True                   |
 | i/123                        | `int`   | Type the string 123 as type `int`                                       | 123                    |
 | f/123.4                      | `float` | Type the string 123.4 as type `float`                                   | 123.4                  |
 | "text" or 'text' or \`text\` | `str`   | It just takes what's in quote, not to be interpreted as a variable name | text                   |
+| ("test", i/56)               | `list`  | Use typing for typed otherwise text will be used as variable name       | ("test", 56)           |
 
 ### TODO
 

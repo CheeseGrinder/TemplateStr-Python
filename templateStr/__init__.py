@@ -120,7 +120,8 @@ class TemplateStr:
             return (fvalue, ok)
 
         if index is not None and isinstance(fvalue, list):
-            fvalue = fvalue[index]
+            try: fvalue = fvalue[index]
+            except (IndexError): fvalue = f"[index '{index}' out of range]"
         elif index is not None:
             ok = False
             fvalue = f"[key '{key}' is not list]"

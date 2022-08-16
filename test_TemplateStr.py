@@ -66,7 +66,7 @@ class TestParseMethode(unittest.TestCase):
         text_5: list = ["${dict.dict1.value}", "[key 'dict.dict1.value' not exist]"]
         text_6: list = ["${list[1]}", "42"]
         text_7: list = ["${lists[1]}", "[key 'lists' not exist]"]
-        text_8: list = ["${int[1]}", "[key 'int' is not list]"]
+        text_8: list = ["${list[2]}", "[index '2' out of range]"]
 
         parser = TemplateStr(variableDict=varDict)
 

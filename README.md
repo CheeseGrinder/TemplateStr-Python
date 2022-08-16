@@ -51,6 +51,7 @@ varDict: dict = {
     "lower": "azerty",
     "upper": "AZERTY",
     "swap": "AzErTy",
+    "list": ["test", 42],
     "Dict": {"value": "Dict in Dict"},
     "MasterDict": {"SecondDict": {"value": "Dict in Dict in Dict"}},
 }
@@ -67,10 +68,10 @@ parser.parse(text)
 ```
 
 - `parse(text: str) -> str` : parse all (variable, function, condition and switch)
-- `parseVariable(text: str) -> str` : parse Variable ; ${{variableName}}
-- `parseFunction(text: str) -> str` : parse Function and Custom Function ; @{{functionName}}
-- `parseCondition(text: str) -> str` : parse Condition ; #{{value1 == value2; trueValue | falseValue}}
-- `parseSwitch(text: str) -> str` : parse Switch ; ?{{var; value1:#0F0, value2:#00F, ..., _:#000}}
+- `parseVariable(text: str) -> str` : parse Variable ; ${variableName}
+- `parseFunction(text: str) -> str` : parse Function and Custom Function ; @{functionName}
+- `parseCondition(text: str) -> str` : parse Condition ; #{value1 == value2; trueValue | falseValue}
+- `parseSwitch(text: str) -> str` : parse Switch ; ?{var; value1:#0F0, value2:#00F, ..., _:#000}
 - `hasOne(text: str) -> bool` : check if there are one syntaxe
 - `hasVariable(text: str) -> bool` : check if there are any Variable
 - `hasFunction(text: str) -> bool` : check if there are any Function
@@ -86,9 +87,10 @@ parser.parse(text)
 </br>
 
 The syntax of the Variables is like if :
-- `${{variable}}`
-- `${{Map.value}}`
-- `${{MasterMap.SecondMap.value. ...}}`
+- `${variable}`
+- `${Map.value}`
+- `${MasterMap.SecondMap.value. ...}`
+- `${list[0]}`
 
 if the value does not exist then `None` is return
 
@@ -96,7 +98,7 @@ if the value does not exist then `None` is return
 ```go
 name = "Jame"
 
-"name is ${{name}}" => parse => "name is Jame"
+"name is ${name}" => parse => "name is Jame"
 ```
 
 </details>
@@ -106,23 +108,23 @@ name = "Jame"
 <summary><strong>Function</strong></summary>
 </br>
 
-The syntax of the Function is like if : `@{{function; parameter}}` or `@{{function}}`
+The syntax of the Function is like if : `@{function; parameter}` or `@{function}`
 
 internal function list :
 
-- `@{{uppercase; variableName}}`
-- `@{{uppercaseFirst; variableName}}`
-- `@{{lowercase; variableName}}`
-- `@{{swapcase; variableName}}`
-- `@{{time}}`
-- `@{{date}}`
-- `@{{dateTime}}`
+- `@{uppercase; variableName}`
+- `@{uppercaseFirst; variableName}`
+- `@{lowercase; variableName}`
+- `@{swapcase; variableName}`
+- `@{time}`
+- `@{date}`
+- `@{dateTime}`
 
 <!-- V Be careful, it's not a "go" code, it's just to have some colour in the rendering -->
 ```go
 name = "jame"
 
-"name is @{{uppercase; name}}" => parse => "name is JAME"
+"name is @{uppercase; name}" => parse => "name is JAME"
 ```
 
 </details>
@@ -133,7 +135,7 @@ name = "jame"
 <summary><strong>Custom Function</strong></summary>
 </br>
 
-The syntax of the Custom Function is like if : `@{{customFunction; param1 param2 ...}}` or `@{{customFunction}}`
+The syntax of the Custom Function is like if : `@{customFunction; param1 param2 ...}` or `@{customFunction}`
 
 `Syntaxe Typing` can be used at the parameter level of custom functions
 
@@ -150,7 +152,7 @@ For developers :
 </br>
 
 The syntax of the Condition is like if :
-- `#{{value1 == value2; trueValue | falseValue}}`
+- `#{value1 == value2; trueValue | falseValue}`
 
 comparator:
 - `==`
@@ -176,7 +178,7 @@ comparator:
 ```go
 name = "Jame"
 
-"Jame is equal to James ? #{{name == 'James'; Yes | No}}" => parse => "Jame is equal to James ? No"
+"Jame is equal to James ? #{name == 'James'; Yes | No}" => parse => "Jame is equal to James ? No"
 ```
 
 </details>
@@ -188,8 +190,8 @@ name = "Jame"
 </br>
 
 The syntax of the Switch is like if : 
-- `?{{variableName; value1:#0F0, value2:#00F, ..., _:#000}}`
-- `?{{type/variableName; value1:#0F0, value2:#00F, ..., _:#000}}`
+- `?{variableName; value1::#0F0, value2::#00F, ..., _::#000}`
+- `?{type/variableName; value1::#0F0, value2::#00F, ..., _::#000}`
 
 The value of `variableName` is compared with all the `values*`,
 if a `values*` is equal to the value of `variableName` then the value after the ":" will be returned
@@ -207,8 +209,8 @@ syntaxe for specify type `variableName` :
 name = "Jame"
 yearsOld = 36
 
-"how old is Jame ? ?{{name; Jame:42 years old, William:36 years old, _:I don't know}}" => parse => "how old is Jame ? 42 years old"
-"who at 36 years old ? ?{{int/yearsOld; 42:Jame !, 36:William !, _:I don't know}}" => parse => "who at 42 years old ? William !"
+"how old is Jame ? ?{name; Jame::42 years old, William::36 years old, _::I don't know}" => parse => "how old is Jame ? 42 years old"
+"who at 36 years old ? ?{int/yearsOld; 42::Jame !, 36::William !, _::I don't know}" => parse => "who at 42 years old ? William !"
 ```
 
 </details>

@@ -1,10 +1,10 @@
-import sys
 import re as regex
 from typing import Any, Pattern, Tuple
 from distutils.util import strtobool
 from time import strftime, localtime
 
 from templateStr.reg import *
+from templateStr.error import BadComparatorError, CustomFunctionReturnError, NotAListError, NotFoundVariableError, NotFoundFunctionError
 
 class TemplateStr:
 
@@ -124,16 +124,18 @@ class TemplateStr:
                 fvalue = self.__variables[key]
 
         except (KeyError, TypeError):
-            ok = False
-            fvalue = f"[key '{key}' not exist]"
-            return (fvalue, ok)
+            raise NotFoundVariableError(f"[key '{key}' not exist]")
+            # ok = False
+            # fvalue = f"[key '{key}' not exist]"
+            # return (fvalue, ok)
 
         if index is not None and isinstance(fvalue, list):
             try: fvalue = fvalue[index]
-            except (IndexError): fvalue = f"[index '{index}' out of range]"
+            except: raise IndexError(f"[index '{index}' out of range]")
         elif index is not None:
-            ok = False
-            fvalue = f"[key '{key}' is not list]"
+            raise NotAListError(f"[key '{key}' is not list]")
+            # ok = False
+            # fvalue = f"[key '{key}' is not list]"
 
         return (fvalue, ok)
 
@@ -236,9 +238,9 @@ class TemplateStr:
                             if resultTextfunc != None:
                                 text = text.replace(m.groupdict()['match'], resultTextfunc)
                             else:
-                                sys.exit(f'[Function {functionName} must return a string]')
+                                raise CustomFunctionReturnError(f'[Function {functionName} must return a string]')
                 else:
-                    sys.exit(f'[Function {functionName} not exist]')
+                    raise NotFoundFunctionError(f'[Function {functionName} not exist]')
             
         return text
 
@@ -280,7 +282,7 @@ class TemplateStr:
                     elif conditionSymbol == ">":
                         text = text.replace(match, trueValue if value1 > value2 else falseValue)
                     else:
-                        sys.exit(f'[{conditionSymbol} is not valid comparator]')
+                        raise BadComparatorError(f'[{conditionSymbol} is not valid comparator]')
 
         return text
 

@@ -1,5 +1,6 @@
 import unittest
 from templateStr import TemplateStr
+from templateStr.error import NotFoundVariableError
 from time import strftime, localtime
 
 def test() -> str:
@@ -128,10 +129,11 @@ class TestParseMethode(unittest.TestCase):
         text_1: list = ["Name is @{uppercase; str}, ${int} years old. Dict: ${Dict.value}. my keyboard: #{lower == 'azerty'; azerty | qwerty}, ?{lower; azerty::yes, AZERTY::yo, _::ynyway}",
              "Name is JAME, 32 years old. Dict: Dict in Dict. my keyboard: azerty, yes"]
         text_2: list = ["test var in var ${${var}}", "test var in var 32"]
-        text_3: list = ["test func in func @{lowercase; @{uppercase; str}}", "test func in func none"]
-        text_4: list = ["test if in if #{lower == 'azerty2'; azerty | #{lower == 'querty'; yes | no}}", "test if in if no"]
-        text_5: list = ["test switch in switch ?{str; Jame::?{Build; Succes::#0, Failed::#1, _::#default}, Tony::#1, Marco::#2, _::#default}", "test switch in switch #0"]
-        text_6: list = ["test wtf ?{str; Jame::?{int/${var}; 32::#0, 36::#1, _::#default}, Tony::#1, Marco::#2, _::#default2}", "test wtf #0"]
+        text_3: list = ["test if in if #{lower == 'azerty2'; azerty | #{lower == 'querty'; yes | no}}", "test if in if no"]
+        text_4: list = ["test switch in switch ?{str; Jame::?{Build; Succes::#0, Failed::#1, _::#default}, Tony::#1, Marco::#2, _::#default}", "test switch in switch #0"]
+        text_5: list = ["test wtf ?{str; Jame::?{int/${var}; 32::#0, 36::#1, _::#default}, Tony::#1, Marco::#2, _::#default2}", "test wtf #0"]
+
+        text_error_1: list = ["test func in func @{lowercase; @{uppercase; str}}", "[key 'JAME' not exist]"]
 
         parser = TemplateStr(funcs, varDict)
 
@@ -140,18 +142,23 @@ class TestParseMethode(unittest.TestCase):
         self.assertEqual(parser.parse(text_3[0]), text_3[1], "text_3")
         self.assertEqual(parser.parse(text_4[0]), text_4[1], "text_4")
         self.assertEqual(parser.parse(text_5[0]), text_5[1], "text_5")
-        self.assertEqual(parser.parse(text_6[0]), text_6[1], "text_6")
+
+        try:
+            parser.parse(text_error_1[0])
+        except NotFoundVariableError as err:
+            self.assertEqual(str(err), text_error_1[1], "text_error_1")
 
     def testVariable(self):
 
         text_1: list = ["var bool = ${bool} and name = ${str}", "var bool = True and name = Jame"]
         text_2: list = ["${Dict.value}", "Dict in Dict"]
         text_3: list = ["${MasterDict.SecondDict.value}", "Dict in Dict in Dict"]
-        text_4: list = ["${word}", "[key 'word' not exist]"]
-        text_5: list = ["${dict.dict1.value}", "[key 'dict.dict1.value' not exist]"]
-        text_6: list = ["${list[1]}", "42"]
-        text_7: list = ["${lists[1]}", "[key 'lists' not exist]"]
-        text_8: list = ["${list[2]}", "[index '2' out of range]"]
+        text_4: list = ["${list[1]}", "42"]
+
+        text_error_1: list = ["${word}", "[key 'word' not exist]"]
+        text_error_2: list = ["${dict.dict1.value}", "[key 'dict.dict1.value' not exist]"]
+        text_error_3: list = ["${lists[1]}", "[key 'lists' not exist]"]
+        text_error_4: list = ["${list[2]}", "[index '2' out of range]"]
 
         parser = TemplateStr(variableDict=varDict)
 
@@ -159,10 +166,26 @@ class TestParseMethode(unittest.TestCase):
         self.assertEqual(parser.parseVariable(text_2[0]), text_2[1], "text_2")
         self.assertEqual(parser.parseVariable(text_3[0]), text_3[1], "text_3")
         self.assertEqual(parser.parseVariable(text_4[0]), text_4[1], "text_4")
-        self.assertEqual(parser.parseVariable(text_5[0]), text_5[1], "text_5")
-        self.assertEqual(parser.parseVariable(text_6[0]), text_6[1], "text_6")
-        self.assertEqual(parser.parseVariable(text_7[0]), text_7[1], "text_7")
-        self.assertEqual(parser.parseVariable(text_8[0]), text_8[1], "text_8")
+
+        try:
+            parser.parseVariable(text_error_1[0])
+        except NotFoundVariableError as err:
+            self.assertEqual(str(err), text_error_1[1], "text_error_1")
+
+        try:
+            parser.parseVariable(text_error_2[0])
+        except NotFoundVariableError as err:
+            self.assertEqual(str(err), text_error_2[1], "text_error_2")
+
+        try:
+            parser.parseVariable(text_error_3[0])
+        except NotFoundVariableError as err:
+            self.assertEqual(str(err), text_error_3[1], "text_error_3")
+
+        try:
+            parser.parseVariable(text_error_4[0])
+        except IndexError as err:
+            self.assertEqual(str(err), text_error_4[1], "text_error_4")
     
     def testInternFunction(self):
 
@@ -205,7 +228,7 @@ class TestParseMethode(unittest.TestCase):
         int_Equal_Str: list = ["#{i/4 == 'text'; yes | no}", "no"]
         float_Equal_Str: list = ["#{f/4.5 == 'text'; yes | no}", "no"]
         bool_Equal_Str: list = ["#{b/True == 'text'; yes | no}", "no"]
-        var_Equal_Str: list = ["#{age == 'text'; yes | no}", "no"]
+        var_Equal_Str: list = ["#{int == 'text'; yes | no}", "no"]
 
         parser = TemplateStr(variableDict=varDict)
 
@@ -223,7 +246,7 @@ class TestParseMethode(unittest.TestCase):
         int_NoT_Equal_Str: list = ["#{i/4 != 'text'; yes | no}", "yes"]
         float_NoT_Equal_Str: list = ["#{f/4.5 != 'text'; yes | no}", "yes"]
         bool_NoT_Equal_Str: list = ["#{b/True != 'text'; yes | no}", "yes"]
-        var_NoT_Equal_Str: list = ["#{age != 'text'; yes | no}", "yes"]
+        var_NoT_Equal_Str: list = ["#{int != 'text'; yes | no}", "yes"]
 
         parser = TemplateStr(variableDict=varDict)
 

@@ -19,9 +19,7 @@ class TemplateStr:
     def __init__(self, functionList: list = [], variableDict: dict = {}):
         '''
         `functionList: list`
-
         `variableDict: dict`
-
         '''
 
         self.__functions = functionList
@@ -79,9 +77,9 @@ class TemplateStr:
                     list_temp.append(numberfloat)
                 elif groupParam['variable'] != None:
                     if groupParam['index'] == None:
-                        list_temp.append(self.__getVariable(groupParam['variable'])[0])
+                        list_temp.append(self.__getVariable(groupParam['variable']))
                     else:
-                        list_temp.append(self.__getVariable(groupParam['variable'], int(groupParam['index']))[0])
+                        list_temp.append(self.__getVariable(groupParam['variable'], int(groupParam['index'])))
 
                 elif groupParam['list'] != None:
                     l = groupParam['list'].split(", ")
@@ -107,9 +105,7 @@ class TemplateStr:
 
         return list_temp
 
-    def __getVariable(self, key: str, index: int = None) -> Tuple[Any, bool]:
-
-        ok: bool = True
+    def __getVariable(self, key: str, index: int = None) -> Any:
 
         try:
             if '.' in key and not key.isspace():
@@ -137,7 +133,7 @@ class TemplateStr:
             # ok = False
             # fvalue = f"[key '{key}' is not list]"
 
-        return (fvalue, ok)
+        return fvalue
 
     def parse(self, text: str) -> str:
         '''
@@ -178,9 +174,9 @@ class TemplateStr:
                 key: str = group['variable']
                 var: Any
                 if group['index'] == None:
-                    var = self.__getVariable(key)[0]
+                    var = self.__getVariable(key)
                 else:
-                    var = self.__getVariable(key, int(group['index']))[0]
+                    var = self.__getVariable(key, int(group['index']))
 
                 text = text.replace(match, str(var))
 
@@ -188,7 +184,7 @@ class TemplateStr:
 
     def parseFunction(self, text: str) -> str:
         '''
-        parse all the `{{@function param1 param2}}` or `{{@function}}` in the text give in
+        parse all the `@{function; param1 param2}` or `@{function}` in the text give in
 
         return -> str
         '''
@@ -203,20 +199,16 @@ class TemplateStr:
                 match: str = group['match']
                 parameters: str = group['parameters']
 
-                value: str = "none"
-
-                v: Tuple = self.__getVariable(parameters)
-
-                if parameters != None and v[1]:
-                    value = v[0]
+                def __v(p) -> str:
+                    if p != None: return str(self.__getVariable(p))
 
                 functionName: str = group['functionName']
 
-                if functionName == 'uppercase': text = text.replace(match, value.upper())
-                elif functionName == 'uppercaseFirst': text = text.replace(match, value.capitalize())
-                elif functionName == 'lowercase': text = text.replace(match, value.lower())
-                # elif functionName == 'casefold': text = text.replace(match, value.casefold())
-                elif functionName == 'swapcase': text = text.replace(match, value.swapcase())
+                if functionName == 'uppercase': text = text.replace(match, __v(parameters).upper())
+                elif functionName == 'uppercaseFirst': text = text.replace(match, __v(parameters).capitalize())
+                elif functionName == 'lowercase': text = text.replace(match, __v(parameters).lower())
+                # elif functionName == 'casefold': text = text.replace(match, __v(parameters).casefold())
+                elif functionName == 'swapcase': text = text.replace(match, __v(parameters).swapcase())
                 elif functionName == 'time': text = text.replace(match, strftime("%H:%M:%S", localtime()))
                 elif functionName == 'date': text = text.replace(match, strftime("%d/%m/%Y", localtime()))
                 elif functionName == 'dateTime': text = text.replace(match, strftime("%d/%m/%Y,%H:%M:%S", localtime()))
@@ -246,7 +238,7 @@ class TemplateStr:
 
     def parseCondition(self, text: str) -> str:
         '''
-        parse all the `{{#var1 == var2; value1 | value2}}` in the text give in
+        parse all the `#{var1 == var2; value1 | value2}` in the text give in
 
         return -> str
         '''
@@ -288,7 +280,7 @@ class TemplateStr:
 
     def parseSwitch(self, text: str) -> str:
         '''
-        parse all the `{{?var; value1=#0F0, 56=#00F, ..., default=#000}}` or `{{?var:int; 56=#0F0, 32=#00F, ..., default=#000}}` in the text give in
+        parse all the `?{var; value1::#0F0, 56::#00F, ..., _::#000}}` or `?{int/var; 56::#0F0, 32::#00F, ..., _::#000}}` in the text give in
 
         return -> str
         '''
@@ -314,7 +306,7 @@ class TemplateStr:
 
                     for key in dictTemp.keys():
                         
-                        if key == str(self.__getVariable(keyVar)[0]):
+                        if key == str(self.__getVariable(keyVar)):
                             result = dictTemp[key]
                             break
                         else:
@@ -325,7 +317,7 @@ class TemplateStr:
 
                     for key in dictTemp.keys():
                         
-                        if self.__typing(key, typeVar)[0] == self.__getVariable(keyVar)[0]:
+                        if self.__typing(key, typeVar)[0] == self.__getVariable(keyVar):
                             result = dictTemp[key]
                             break
                         else:

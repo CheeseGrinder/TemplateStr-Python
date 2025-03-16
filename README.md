@@ -1,7 +1,7 @@
 <div align="center">
     <h1>TemplateStr-Python</h1>
     <h3>TemplateStr allows to add variable, function, condition and switch in a string.</h3>
-    <img src="https://img.shields.io/badge/Python-v3.7%5E-green?style=flat-square&logo=python&logoColor=ffd13e&color=3470a2"/>
+    <img src="https://img.shields.io/badge/Python-v3.8%5E-green?style=flat-square&logo=python&logoColor=ffd13e&color=3470a2"/>
     <a href="https://github.com/CheeseGrinder/TemplateStr-Python/actions/workflows/python-app.yml">
         <img src="https://img.shields.io/github/actions/workflow/status/CheeseGrinder/TemplateStr-Python/python_test.yml?label=Test&style=flat-square"/>
     </a>
